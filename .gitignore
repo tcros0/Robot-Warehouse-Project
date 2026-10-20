@@ -1,0 +1,16 @@
+# build output
+*.exe
+*.obj
+*.o
+*.pdb
+*.ilk
+build/
+cmake-build-*/
+
+# editor settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
