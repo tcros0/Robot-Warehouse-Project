@@ -1,9 +1,22 @@
-
 #pragma once
+#ifndef POSITION_H
+#define POSITION_H
 
-struct Position 
-{
-    int row; // -> Robot's row (0 to 14)
-    int col; // -> Robot's column (o to 24)
+class Position {
+private:
+    int xPos;
+    int yPos;
+public:
+    Position();
+    Position(int x, int y);
+
+    int getXPosition() const;
+    int getYPosition() const;
+    void setXPosition(int x);
+    void setYPosition(int y);
+
+    ~Position();
+
 };
 
+#endif
