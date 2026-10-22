@@ -1,0 +1,13 @@
+//
+// Created by Plokiu on 10/22/2026.
+//
+
+#ifndef WAREHOUSEROBOTSIM_FILEMANAGER_H
+#define WAREHOUSEROBOTSIM_FILEMANAGER_H
+
+
+class FileManager {
+};
+
+
+#endif //WAREHOUSEROBOTSIM_FILEMANAGER_H
