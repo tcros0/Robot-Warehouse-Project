@@ -1,0 +1,13 @@
+//
+// Created by Plokiu on 10/22/2026.
+//
+
+#ifndef WAREHOUSEROBOTSIM_ROBOTMANAGER_H
+#define WAREHOUSEROBOTSIM_ROBOTMANAGER_H
+
+
+class RobotManager {
+};
+
+
+#endif //WAREHOUSEROBOTSIM_ROBOTMANAGER_H

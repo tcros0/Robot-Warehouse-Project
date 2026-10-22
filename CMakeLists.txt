@@ -7,4 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include)
 file(GLOB SOURCES src/*.cpp)
 
-add_executable(WarehouseRobotSim ${SOURCES})
+add_executable(WarehouseRobotSim ${SOURCES}
+        src/System.cpp
+        include/System.h
+        src/RobotManager.cpp
+        include/RobotManager.h
+        src/FileManager.cpp
+        include/FileManager.h)
