@@ -4,32 +4,63 @@
 #include "Position.h"
 #include "Item.h"
 #include <string>
-#include <optional>
+#include <vector>
+#include <memory>
 
-class Robot {
+// Robot class
+class Robot
+{
 private:
+    // Low battery warning at 20%
+    static const int LOW_BATTERY = 20;
+
+    // Robot information
     int id;
     Position position;
     int batteryLevel;
     std::string status;
-    std::optional<Item> carriedItem;
+
+    // Item carried by the robot
+    std::shared_ptr<Item> carriedItem;
+
+    // Robot route and task
+    std::vector<Position> route;
+    int currentTaskId;
+    int chargeRate;
 
 public:
+    // Create a robot
     Robot(int robotId, Position startPosition);
 
+    // Get robot information
     int getId() const;
     Position getPosition() const;
     int getBatteryLevel() const;
     std::string getStatus() const;
 
+    // Move the robot
     bool moveUp();
     bool moveDown();
     bool moveLeft();
     bool moveRight();
 
+    // Follow the robot's route
+    bool moveAlongRoute();
+
+    // Manage robot battery
     void drainBattery(int amount);
-    bool pickUpItem(const Item& item);
+    bool isLowBattery() const;
+    void chargeBattery(int amount);
+
+    // Pick up and drop off items
+    bool pickUpItem(std::shared_ptr<Item> item);
     bool dropOffItem();
     bool isCarryingItem() const;
-};
 
+    // Set a route for the robot
+    void setRoute(const std::vector<Position>& newRoute);
+
+    // Manage the robot's task
+    void setCurrentTaskId(int taskId);
+    int getCurrentTaskId() const;
+};
