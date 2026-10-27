@@ -20,13 +20,28 @@ class Warehouse {
 private:
     int length{};
     int width{};
-    std::vector<int> warehouse;
+    std::vector<std::vector<char>> warehouseMap;
+    std::vector<pickupPoint> listPickupPoints;
+    std::vector<deliveryPoint> listDeliveryPoints;
 
 public:
     Warehouse();
     Warehouse(int length, int width);
-    pickupPoint p1;
-    deliveryPoint d1;
+
+    void createMap(int length, int width);
+    bool isInBounds(int row, int col) const;
+
+    void setPickupPoint(int row, int col, int ID);
+    void setDeliveryPoint(int row, int col, int ID);
+    void setChargingPoint(int row, int col, int ID);
+
+    Position getPickupLocation(int id) const;
+    Position getDeliveryLocation(int id) const;
+    Position getChargingLocation(int id) const;
+
+    bool setCell(int row, int col, char symbol);
+    char getCell(int row, int col) const;
+    void display() const;
 
     ~Warehouse();
 };
