@@ -1,9 +1,14 @@
 
 #include "Item.h"
 
-// Constructor
+// Create an item
 Item::Item(int itemId, const std::string& itemName)
     : id(itemId), name(itemName)
+{
+}
+
+// Virtual destructor
+Item::~Item()
 {
 }
 
@@ -18,4 +23,3 @@ std::string Item::getName() const
 {
     return name;
 }
-
