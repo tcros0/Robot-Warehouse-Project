@@ -2,14 +2,17 @@
 #include "Robot.h"
 
 // Create a robot with full battery
-Robot::Robot(int robotId, Position startPosition)
+Robot::Robot(int robotId, Position startPosition,
+             int width, int height)
     : id(robotId),
       position(startPosition),
       batteryLevel(100),
       status("Idle"),
       carriedItem(nullptr),
       currentTaskId(-1),
-      chargeRate(10)
+      chargeRate(10),
+      warehouseWidth(width),
+      warehouseHeight(height)
 {
 }
 
@@ -56,7 +59,7 @@ bool Robot::moveUp()
 bool Robot::moveDown()
 {
     if (batteryLevel <= 0 || status == "Broken" ||
-        position.getYPosition() >= 14)
+        position.getYPosition() >= warehouseHeight - 1)
         return false;
 
     position.setYPosition(position.getYPosition() + 1);
@@ -80,7 +83,7 @@ bool Robot::moveLeft()
 bool Robot::moveRight()
 {
     if (batteryLevel <= 0 || status == "Broken" ||
-        position.getXPosition() >= 24)
+        position.getXPosition() >= warehouseWidth - 1)
         return false;
 
     position.setXPosition(position.getXPosition() + 1);
@@ -110,12 +113,12 @@ bool Robot::isLowBattery() const
 }
 
 // Charge the robot battery
-void Robot::chargeBattery(int amount)
+void Robot::chargeBattery()
 {
-    if (amount <= 0 || status == "Broken")
+    if (status == "Broken")
         return;
 
-    batteryLevel += amount;
+    batteryLevel += chargeRate;
 
     if (batteryLevel > 100)
         batteryLevel = 100;
@@ -137,17 +140,18 @@ bool Robot::pickUpItem(std::shared_ptr<Item> item)
 }
 
 // Drop off an item
-bool Robot::dropOffItem()
+std::shared_ptr<Item> Robot::dropOffItem()
 {
     if (!carriedItem)
-        return false;
+        return nullptr;
 
+    std::shared_ptr<Item> droppedItem = carriedItem;
     carriedItem.reset();
 
     if (batteryLevel > 0 && status != "Broken")
         status = "Idle";
 
-    return true;
+    return droppedItem;
 }
 
 // Check if the robot has an item
