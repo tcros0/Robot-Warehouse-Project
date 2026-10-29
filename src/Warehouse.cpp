@@ -11,9 +11,10 @@ Warehouse::Warehouse(int length, int width) {
 
 bool Warehouse::isInBounds(int x, int y) const {
     if (x>=length || y>=width||x<0 || y<0) {
+        std::cout<<"Coordinates are not inside the map" << std::endl;
         return false;
     }
-        return true;
+    return true;
 
 }
 
@@ -57,7 +58,6 @@ void Warehouse::createMap(int x, int y) {
 void Warehouse::setPickupPoint(int row, int col, int ID) {
 
     if (!isInBounds(row, col)) {
-        std::cout<<"Coordinates are not inside the map" << std::endl;
         return;
     }
 
@@ -80,7 +80,6 @@ void Warehouse::setPickupPoint(int row, int col, int ID) {
 void Warehouse::setDeliveryPoint(int row, int col, int ID) {
 
     if (!isInBounds(row, col)) {
-        std::cout<<"Coordinates are not inside the map" << std::endl;
         return;
     }
 
@@ -101,7 +100,6 @@ void Warehouse::setDeliveryPoint(int row, int col, int ID) {
 void Warehouse::setChargingPoint(int row, int col, int ID) {
 
     if (!isInBounds(row, col)) {
-        std::cout<<"Coordinates are not inside the map" << std::endl;
         return;
     }
 
@@ -132,6 +130,51 @@ void Warehouse::displayDeliveryLocations() const{
     for (int i = 0; i<listDeliveryPoints.size(); i++) {
         std::cout<<"Delivery point ID: " << listDeliveryPoints[i].ID << std::endl;
         std::cout<<"x: " << listDeliveryPoints[i].positionD.getXPosition() << " y: " << listDeliveryPoints[i].positionD.getYPosition() << std::endl;
+    }
+}
+
+void Warehouse::displayChargingLocation() {
+    std::cout<<"Charging Locations: " << std::endl;
+    for (int i = 0; i<listChargingPoints.size(); i++) {
+        std::cout<<"Charging point ID: " << listChargingPoints[i].ID << std::endl;
+        std::cout<<"x: " << listChargingPoints[i].positionC.getXPosition() << " y: " << listChargingPoints[i].positionC.getYPosition() << std::endl;
+    }
+}
+
+Position Warehouse::getPickupLocation(int ID) const {
+    return listPickupPoints[ID].positionPU;
+}
+
+Position Warehouse::getDeliveryLocation(int ID) const {
+    return listDeliveryPoints[ID].positionD;
+}
+
+Position Warehouse::getChargingLocation(int ID) const {
+    return listChargingPoints[ID].positionC;
+}
+
+bool Warehouse::setCell(int x, int y, char symbol) {
+    if (!isInBounds(x, y)) {
+        return false;
+    }
+    warehouseMap[x][y] = symbol;
+    return true;
+}
+
+char Warehouse::getCell(int x, int y) const {
+    if (!isInBounds(x, y)) {
+        return ' ';
+    }
+    return warehouseMap[x][y];
+}
+
+void Warehouse::display() const {
+    std::cout<<"Warehouse Map" << std::endl;
+    for (int i = 0; i<warehouseMap.size(); i++) {
+        for (int o = 0; o<warehouseMap[i].size(); o++) {
+            std::cout << warehouseMap[i][o];
+        }
+        std::cout<<std::endl;
     }
 }
 
