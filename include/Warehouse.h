@@ -52,6 +52,10 @@ public:
     Position getDeliveryLocation(int id) const;
     Position getChargingLocation(int id) const;
 
+    //returns size of warehouse
+    int getLength() const;
+    int getWidth() const;
+
     bool setCell(int row, int col, char symbol);
     char getCell(int row, int col) const;
     void display() const;
