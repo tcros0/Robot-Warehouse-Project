@@ -30,10 +30,20 @@ private:
     int currentTaskId;
     int chargeRate;
 
+    // Warehouse size
+    int warehouseWidth;
+    int warehouseHeight;
+
 public:
     // Create a robot
+    Robot(int robotId, Position startPosition,
+          int width, int height);
+
     Robot(int robotId, Position startPosition);
     Robot(int robotId, Position startPosition, int batteryLevel);
+
+    Robot(int robotId, Position startPosition,
+          int batteryLevel);
 
     // Get robot information
     int getId() const;
@@ -53,11 +63,11 @@ public:
     // Manage robot battery
     void drainBattery(int amount);
     bool isLowBattery() const;
-    void chargeBattery(int amount);
+    void chargeBattery();
 
     // Pick up and drop off items
     bool pickUpItem(std::shared_ptr<Item> item);
-    bool dropOffItem();
+    std::shared_ptr<Item> dropOffItem();
     bool isCarryingItem() const;
 
     // Set a route for the robot
@@ -67,3 +77,4 @@ public:
     void setCurrentTaskId(int taskId);
     int getCurrentTaskId() const;
 };
+
