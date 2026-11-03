@@ -13,6 +13,17 @@ Robot::Robot(int robotId, Position startPosition)
 {
 }
 
+Robot::Robot(int robotId, Position startPosition, int batteryLevel)
+    : id(robotId),
+      position(startPosition),
+      batteryLevel(batteryLevel),
+      status("Idle"),
+      carriedItem(nullptr),
+      currentTaskId(-1),
+      chargeRate(10)
+{
+};
+
 // Get robot information
 int Robot::getId() const
 {

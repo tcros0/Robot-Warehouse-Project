@@ -161,6 +161,14 @@ bool Warehouse::setCell(int x, int y, char symbol) {
     return true;
 }
 
+void Warehouse::setLength(int length) {
+    this->length = length;
+}
+
+void Warehouse::setWidth(int width) {
+    this->width = width;
+}
+
 char Warehouse::getCell(int x, int y) const {
     if (!isInBounds(x, y)) {
         return ' ';
