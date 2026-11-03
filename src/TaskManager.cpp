@@ -1,10 +1,14 @@
 
-
 #include "TaskManager.h"
 
 // Create a task manager
 TaskManager::TaskManager()
     : nextTaskId(1)
+{
+}
+
+// Destroy the task manager
+TaskManager::~TaskManager()
 {
 }
 
@@ -27,6 +31,7 @@ bool TaskManager::isRobotAvailable(const Robot& robot) const
 // Check if a pickup location is available
 bool TaskManager::isPickupAvailable(Position pickup) const
 {
+    // Check active tasks at this pickup location
     for (const Task& task : tasks)
     {
         Position location = task.getPickupLocation();
@@ -112,3 +117,4 @@ bool TaskManager::reassignTask(int taskId, Robot& robot)
 
     return true;
 }
+
