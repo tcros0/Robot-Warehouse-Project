@@ -1,4 +1,5 @@
 
+
 #include "Robot.h"
 
 // Create a robot with full battery
@@ -14,6 +15,28 @@ Robot::Robot(int robotId, Position startPosition,
       warehouseWidth(width),
       warehouseHeight(height)
 {
+}
+
+// Create a robot with default warehouse size
+Robot::Robot(int robotId, Position startPosition)
+    : Robot(robotId, startPosition, 25, 15)
+{
+}
+
+// Create a robot with a custom battery level
+Robot::Robot(int robotId, Position startPosition, int battery)
+    : Robot(robotId, startPosition, 25, 15)
+{
+    if (battery < 0)
+        battery = 0;
+
+    if (battery > 100)
+        battery = 100;
+
+    batteryLevel = battery;
+
+    if (batteryLevel == 0)
+        status = "Out of Battery";
 }
 
 // Get robot information
