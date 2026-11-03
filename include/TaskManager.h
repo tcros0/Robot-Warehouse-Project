@@ -21,6 +21,9 @@ public:
     // Create a task manager
     TaskManager();
 
+    // Destroy the task manager
+    ~TaskManager();
+
     // Create a new task
     void createTask(int itemId, Position pickup,
                     Position delivery);
