@@ -56,6 +56,9 @@ public:
     int getLength() const;
     int getWidth() const;
 
+    void setLength(int length);
+    void setWidth(int width);
+
     bool setCell(int row, int col, char symbol);
     char getCell(int row, int col) const;
     void display() const;
