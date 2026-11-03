@@ -1,0 +1,1 @@
+//Format idea: PositionX, PositionY, list of item separated by comma

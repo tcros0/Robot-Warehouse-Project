@@ -2,24 +2,26 @@
 #include <vector>
 #include "Item.h"
 #include "Position.h"
+#include <memory>
 
 
 struct pickupPoint {
     int ID;
     Position positionPU;
-    std::vector<Item> items;
+    std::vector<std::shared_ptr<Item>> items;
 };
 
 struct deliveryPoint {
     int ID;
     Position positionD;
-    std::vector<Item> items;
+    std::vector<std::shared_ptr<Item>> items;
 };
 
 struct chargingPoint {
     int ID;
     static int constexpr chargeRate = 10;
     Position positionC;
+    bool free;
 
 };
 
@@ -42,11 +44,14 @@ public:
 
     void setPickupPoint(int row, int col, int ID);
     void setDeliveryPoint(int row, int col, int ID);
-    void setChargingPoint(int row, int col, int ID);
+    void setChargingPoint(int row, int col, int ID, bool free);
+
+    bool addListPickUpItems(int ID, std::shared_ptr<Item> item);
+    bool addListDeliveryItems(int ID, std::shared_ptr<Item> item);
 
     void displayPickupLocations() const;
     void displayDeliveryLocations() const;
-    void displayChargingLocation();
+    void displayChargingLocation() const;
 
     Position getPickupLocation(int id) const;
     Position getDeliveryLocation(int id) const;

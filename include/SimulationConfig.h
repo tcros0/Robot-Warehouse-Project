@@ -2,7 +2,7 @@
 #define SIMULATIONCONFIG_H
 
 #include <vector>
-
+#include "Warehouse.h"
 #include "Position.h"
 
 struct RobotConfig {
@@ -16,6 +16,12 @@ struct SimulationConfig {
 
     int length{};
     int width{};
+
+    std::vector<deliveryPoint> deliveryPoints;
+    std::vector<pickupPoint> pickupPoints;
+    std::vector<chargingPoint> chargingPoints;
+    std::vector<Position> obstacles;
+
     std::vector<RobotConfig> robots;
 };
 
