@@ -10,6 +10,8 @@
 // Robot class
 class Robot
 {
+    friend class Simulation;
+
 private:
     // Low battery warning at 20%
     static const int LOW_BATTERY = 20;
@@ -36,6 +38,11 @@ public:
     // Create a robot
     Robot(int robotId, Position startPosition,
           int width, int height);
+
+    Robot(int robotId, Position startPosition);
+
+    Robot(int robotId, Position startPosition,
+          int batteryLevel);
 
     // Get robot information
     int getId() const;
@@ -69,3 +76,4 @@ public:
     void setCurrentTaskId(int taskId);
     int getCurrentTaskId() const;
 };
+
