@@ -40,6 +40,7 @@ public:
           int width, int height);
 
     Robot(int robotId, Position startPosition);
+    Robot(int robotId, Position startPosition, int batteryLevel);
 
     Robot(int robotId, Position startPosition,
           int batteryLevel);

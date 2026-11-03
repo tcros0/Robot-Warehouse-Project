@@ -2,12 +2,20 @@
 // Created by Plokiu on 10/22/2026.
 //
 
-#ifndef WAREHOUSEROBOTSIM_FILEMANAGER_H
-#define WAREHOUSEROBOTSIM_FILEMANAGER_H
+#ifndef FILEMANAGER_H
+#define FILEMANAGER_H
 
 
 class FileManager {
+
+private:
+
+public:
+    FileManager();
+    bool loadData();
+    bool saveData();
+    ~FileManager();
 };
 
 
-#endif //WAREHOUSEROBOTSIM_FILEMANAGER_H
+#endif //FILEMANAGER_H

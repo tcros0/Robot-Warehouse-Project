@@ -15,4 +15,5 @@ add_executable(WarehouseRobotSim ${SOURCES}
         src/FileManager.cpp
         include/FileManager.h
         src/Position.cpp
+        src/Warehouse.cpp
 )
