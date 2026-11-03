@@ -4,7 +4,6 @@
 #include "Warehouse.h"
 #include "Robot.h"
 #include "TaskManager.h"
-#include "FileManager.h"
 #include "PathFinding.h"
 
 #include <vector>
@@ -12,6 +11,7 @@
 #include "SimulationConfig.h"
 
 class Simulation {
+    friend class FileManager;
 
 private:
     SimulationConfig config;
@@ -32,12 +32,13 @@ public:
 
     void run(); //Starts simulation
     void advanceTime();
-    void resetSimulation();
 
     void createTask();
     void assignTask();
     void inspectRobot();
     void showTaskStatus();
+
+    void buildFromConfig();//uses config to reset map
 
     template <typename T>
     T getInput(const std::string& prompt);
