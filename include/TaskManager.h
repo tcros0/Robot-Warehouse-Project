@@ -1,48 +1,114 @@
 
-#pragma once
 
-#include "Task.h"
-#include "Robot.h"
-#include "Position.h"
-#include <vector>
+#include "TaskManager.h"
 
-// TaskManager class
-class TaskManager
+// Create a task manager
+TaskManager::TaskManager()
+    : nextTaskId(1)
 {
-private:
-    // Store all tasks
-    std::vector<Task> tasks;
+}
 
-    // Generate task IDs
-    int nextTaskId;
+// Create a new task
+void TaskManager::createTask(int itemId, Position pickup,
+                             Position delivery)
+{
+    tasks.emplace_back(nextTaskId, itemId, pickup, delivery);
+    nextTaskId++;
+}
 
-public:
-    // Create a task manager
-    TaskManager();
+// Check if a robot is available
+bool TaskManager::isRobotAvailable(const Robot& robot) const
+{
+    return robot.getStatus() == "Idle" &&
+           robot.getCurrentTaskId() == -1 &&
+           robot.getBatteryLevel() > 20;
+}
 
-    // Create a new task
-    void createTask(int itemId, Position pickup,
-                    Position delivery);
+// Check if a pickup location is available
+bool TaskManager::isPickupAvailable(Position pickup) const
+{
+    for (const Task& task : tasks)
+    {
+        Position location = task.getPickupLocation();
 
-    // Check if a robot is available
-    bool isRobotAvailable(const Robot& robot) const;
+        if (location.getXPosition() == pickup.getXPosition() &&
+            location.getYPosition() == pickup.getYPosition() &&
+            task.getStatus() != "Completed")
+        {
+            return false;
+        }
+    }
 
-    // Check if a pickup location is available
-    bool isPickupAvailable(Position pickup) const;
+    return true;
+}
 
-    // Assign a task to a robot
-    bool assignTask(int taskId, Robot& robot);
+// Assign a task to a robot
+bool TaskManager::assignTask(int taskId, Robot& robot)
+{
+    Task* task = getTask(taskId);
 
-    // Get all tasks
-    const std::vector<Task>& getTasks() const;
+    if (task == nullptr ||
+        task->getStatus() != "Pending" ||
+        !isRobotAvailable(robot))
+    {
+        return false;
+    }
 
-    // Find a task by ID
-    Task* getTask(int taskId);
+    task->assignRobot(robot.getId());
+    robot.setCurrentTaskId(taskId);
 
-    // Complete a task
-    bool markTaskCompleted(int taskId);
+    return true;
+}
 
-    // Reassign a task to another robot
-    bool reassignTask(int taskId, Robot& robot);
-};
+// Get all tasks
+const std::vector<Task>& TaskManager::getTasks() const
+{
+    return tasks;
+}
 
+// Find a task by ID
+Task* TaskManager::getTask(int taskId)
+{
+    for (Task& task : tasks)
+    {
+        if (task.getTaskId() == taskId)
+        {
+            return &task;
+        }
+    }
+
+    return nullptr;
+}
+
+// Complete a task
+bool TaskManager::markTaskCompleted(int taskId)
+{
+    Task* task = getTask(taskId);
+
+    if (task == nullptr ||
+        task->getStatus() == "Completed")
+    {
+        return false;
+    }
+
+    task->setStatus("Completed");
+    return true;
+}
+
+// Reassign a task to another robot
+bool TaskManager::reassignTask(int taskId, Robot& robot)
+{
+    Task* task = getTask(taskId);
+
+    if (task == nullptr ||
+        task->getStatus() == "Completed" ||
+        !isRobotAvailable(robot))
+    {
+        return false;
+    }
+
+    task->assignRobot(robot.getId());
+    robot.setCurrentTaskId(taskId);
+
+    return true;
+}
