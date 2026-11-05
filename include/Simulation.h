@@ -38,6 +38,9 @@ public:
     void inspectRobot();
     void showTaskStatus();
 
+    void ShowPath();
+    void displayPath(const std::vector<Position>& path) const;
+
     void buildFromConfig();//uses config to reset map
 
     template <typename T>
