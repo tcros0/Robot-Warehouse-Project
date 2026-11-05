@@ -8,8 +8,6 @@ include_directories(include)
 file(GLOB SOURCES src/*.cpp)
 
 add_executable(WarehouseRobotSim ${SOURCES}
-        src/System.cpp
-        include/System.h
         src/RobotManager.cpp
         include/RobotManager.h
         src/FileManager.cpp

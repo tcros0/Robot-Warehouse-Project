@@ -15,6 +15,11 @@ Simulation::Simulation(const SimulationConfig& config) {
 
 
 void Simulation::buildFromConfig() {
+
+    warehouse = Warehouse();
+    robots.clear();
+    currentTime = 0;
+
     //Creates x by y map size
     warehouse.createMap(config.length, config.width);
 
@@ -63,6 +68,84 @@ void Simulation::buildFromConfig() {
 
 }
 
+void Simulation::ShowPath() {
+    //Show where the points are so the user knows what coordinates to enter
+    warehouse.displayPickupLocations();
+    warehouse.displayDeliveryLocations();
+    warehouse.displayChargingLocation();
+
+    bool done = false;
+
+
+    //x = row, y = column
+    int startX = getInput<int>("Start row (0-" + std::to_string(config.length - 1) + "): ", 0, config.length - 1);
+    int startY = getInput<int>("Start column (0-" + std::to_string(config.width - 1) + "): ", 0, config.width - 1);
+    int goalX = getInput<int>("Goal row (0-" + std::to_string(config.length - 1) + "): ", 0, config.length - 1);
+    int goalY = getInput<int>("Goal column (0-" + std::to_string(config.width - 1) + "): ", 0, config.width - 1);
+
+    while (!done) {
+        if (warehouse.getCell(startX, startY) == '#') {
+            std::cout << "Start is on a wall.\n";
+            startX = getInput<int>("Start row (0-" + std::to_string(config.length - 1) + "): ", 0, config.length - 1);
+            startY = getInput<int>("Start column (0-" + std::to_string(config.width - 1) + "): ", 0, config.width - 1);
+        }
+        else {
+            done = true;
+        }
+    }
+
+    done = false;
+    while (!done) {
+        if (startX == goalX && startY == goalY) {
+            std::cout << "Start and goal are the same cell.\n";
+            goalX = getInput<int>("Goal row (0-" + std::to_string(config.length - 1) + "): ", 0, config.length - 1);
+            goalY = getInput<int>("Goal column (0-" + std::to_string(config.width - 1) + "): ", 0, config.width - 1);
+
+        }
+        else {
+            done = true;
+        }
+    }
+
+    Position start(startX, startY);
+    Position goal(goalX, goalY);
+
+    std::vector<Position> path = pathfinding.findPath(warehouse, start, goal);
+    displayPath(path);
+
+}
+
+void Simulation::displayPath(const std::vector<Position>& path) const {
+
+    if (path.empty()) {
+        std::cout << "No path found (goal is unreachable or a wall).\n";
+        return;
+    }
+
+    std::cout << "Path:" << std::endl;
+    for (int x = 0; x < config.length; x++) {
+        for (int y = 0; y < config.width; y++) {
+            bool onPath = false;
+            for (const Position& p : path) {
+                if (p.getXPosition() == x && p.getYPosition() == y) {
+                    onPath = true;
+                    break;
+                }
+            }
+
+            //Only draw '*' on empty floor so P, D and C stay visible
+            if (onPath && warehouse.getCell(x, y) == '.') {
+                std::cout << '*';
+            }
+            else {
+                std::cout << warehouse.getCell(x, y);
+            }
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "Path length: " << path.size() << " steps" << std::endl;
+}
+
 void Simulation::run() {
 
     bool done = false;
@@ -78,9 +161,10 @@ void Simulation::run() {
         "\n6.Edit Warehouse"
         "\n7.Reset Warehouse"
         "\n8.Advance time"
-        "\n9.Exit" << std::endl;
+        "\n9.Exit"
+        "\n10.Display Path" <<std::endl;
 
-        option = getInput<int> ("Enter Option: ", 1, 9);
+        option = getInput<int> ("Enter Option: ", 1, 10);
 
 
         switch(option){
@@ -88,23 +172,32 @@ void Simulation::run() {
                 warehouse.display();
                 break;
             case 2:
+                std::cout<<"Nothing was implemented here yet!" << std::endl;
                 break;
             case 3:
+                std::cout<<"Nothing was implemented here yet!" << std::endl;
                 break;
             case 4:
+                std::cout<<"Nothing was implemented here yet!" << std::endl;
                 break;
             case 5:
+                std::cout<<"Nothing was implemented here yet!" << std::endl;
                 break;
             case 6:
+                std::cout<<"Nothing was implemented here yet!" << std::endl;
                 break;
             case 7:
                 buildFromConfig();
                 std::cout<<"Warehouse was reset to initial settings";
                 break;
             case 8:
+                std::cout<<"Nothing was implemented here yet!" << std::endl;
                 break;
             case 9:
                 done = true;
+                break;
+            case 10:
+                ShowPath();
                 break;
         }
     }
