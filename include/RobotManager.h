@@ -9,6 +9,7 @@
 #include "Robot.h"
 
 class RobotManager {
+    friend class Simulation;
 private:
     std::vector<Robot> robots_;
 public:

@@ -204,9 +204,31 @@ void Simulation::run() {
 
 }
 
+
+void Simulation::sendToCharger(Robot& r) {
+
+}
+
 void Simulation::advanceTime() {//updates everything
+
+    std::vector<int> lowBatRobot{};
+
+    for (int i = 0; i<robotManager.robots_.size(); i++) {
+       if (robotManager.robots_[i].isLowBattery()) {
+           lowBatRobot.push_back(i);
+       }
+    }
+
+    for (int i = 0; i<lowBatRobot.size(); i++) {
+
+    }
+
     currentTime++;
-    //need robotManager
+    //check battery level and if robot is ok make each robot move by one
+    //when robot is at charger it keeps its task and when its done we get tha robots task and recalculate the path from that charger to the task it has
+    //check if new tasks were assigned to a robot or one is done charging and needs resume a task
+    //calculate path for that new task
+    //assign new task to robot along with new calculated path
 }
 
 //grabs an input and validates it using getInput<dataType>()

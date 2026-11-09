@@ -18,6 +18,7 @@ private:
     Warehouse warehouse;
     TaskManager taskManager;
     PathFinding pathfinding;
+    RobotManager robotManager;
 
     std::vector<Robot> robots;
 
@@ -37,6 +38,8 @@ public:
     void assignTask();
     void inspectRobot();
     void showTaskStatus();
+
+    void sendToCharger(Robot& r);
 
     void ShowPath();
     void displayPath(const std::vector<Position>& path) const;
