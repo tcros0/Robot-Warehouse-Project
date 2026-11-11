@@ -204,8 +204,16 @@ bool Warehouse::setCell(int x, int y, char symbol) {
     return true;
 }
 
+int Warehouse::getLength() const{
+    return length;
+}
+
 void Warehouse::setLength(int length) {
     this->length = length;
+}
+
+int Warehouse::getWidth() const {
+    return width;
 }
 
 void Warehouse::setWidth(int width) {
