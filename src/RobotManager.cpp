@@ -1,7 +1,3 @@
-//
-// Created by Plokiu on 10/22/2026.
-// Updated by Farrokh880 10/30/2026
-
 #include "../include/RobotManager.h"
 #include <stdexcept>
 

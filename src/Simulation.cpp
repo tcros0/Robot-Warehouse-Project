@@ -2,6 +2,7 @@
 #include "SimulationConfig.h"
 #include "PathFinding.h"
 
+
 #include <iostream>
 #include <limits>
 #include <string>
@@ -208,6 +209,20 @@ void Simulation::run() {
 void Simulation::advanceTime() {//updates everything
     currentTime++;
     //need robotManager
+
+    //check robot battery levels
+
+    std::vector<Robot> robotList= robotManager.getRobots();
+    for (int i = 0; i<robotList.size();i++) {
+        if (robotList[i].isLowBattery()) {
+            robotList[i].setStatus("lowBattery");
+        }
+
+        if (robotList[i].isLowBattery()&& robotList[i].getStatus() != "lowBattery") {
+            robotList[i].setStatus("toCharge");
+            sendToCharge(robotList[i]);
+        }
+    }
 }
 
 void Simulation::setTaskID(int id) {
@@ -283,6 +298,31 @@ void Simulation::sendToCharge(Robot& r) {
 }
 
 void Simulation::continueTask(Robot &r) {
+    PathFinding PathFinder;
+
+    int taskID = r.getCurrentTaskId();
+
+    if (taskID == -1 || taskManager.getTask(taskID) == nullptr) {
+        return;
+    }
+
+    Position taskPickUp = taskManager.getTask(taskID)->getPickupLocation();
+    Position taskDelivery = taskManager.getTask(taskID)->getDeliveryLocation();
+    std::vector<Position> path;
+    Position rPosition = r.getPosition();
+
+    if (!r.isCarryingItem()) {
+        path = PathFinder.findPath(warehouse, rPosition,taskPickUp);
+    }
+    else {
+        path = PathFinder.findPath(warehouse, rPosition, taskDelivery);
+    }
+
+    if (path.empty()) {
+        std::cout << "Path cannot be completed" << std::endl;
+        return;
+    }
+    r.setRoute(path);
 
 }
 

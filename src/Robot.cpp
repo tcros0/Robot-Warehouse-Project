@@ -2,6 +2,8 @@
 
 #include "Robot.h"
 
+#include <utility>
+
 // Create a robot with full battery
 Robot::Robot(int robotId, Position startPosition,
              int width, int height)
@@ -58,6 +60,10 @@ int Robot::getBatteryLevel() const
 std::string Robot::getStatus() const
 {
     return status;
+}
+
+void Robot::setStatus(std::string newStatus) {
+    status = std::move(newStatus);
 }
 
 // Get the current task ID
