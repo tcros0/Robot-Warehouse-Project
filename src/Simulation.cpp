@@ -1,5 +1,6 @@
 #include "../include/Simulation.h"
 #include "SimulationConfig.h"
+#include "PathFinding.h"
 
 #include <iostream>
 #include <limits>
@@ -209,6 +210,10 @@ void Simulation::advanceTime() {//updates everything
     //need robotManager
 }
 
+void Simulation::setTaskID(int id) {
+    taskID = id;
+}
+
 //grabs an input and validates it using getInput<dataType>()
 template <typename T>
 T Simulation::getInput(const std::string& prompt) {
@@ -234,6 +239,51 @@ T Simulation::getInput(const std::string& prompt, T min, T max) {
         if (value >= min && value <= max) return value;
         std::cout << "Please enter a value from " << min << " to " << max << ".\n";
     }
+}
+
+void Simulation::sendToCharge(Robot& r) {
+    Position rPosition = r.getPosition();
+    Position chargePoint{};
+    std::vector<Position> path;
+    PathFinding PathFinder;
+
+    setTaskID(r.getCurrentTaskId());
+
+    int index{};
+    bool freeSpot = false;
+
+    for (int i = 0; i<warehouse.listChargingPoints.size(); i++) {
+        if (warehouse.listChargingPoints[i].free == true){
+            std::vector<Position> path1;
+
+            Position chargePoint1{};
+
+            chargePoint1.setXPosition(warehouse.listChargingPoints[i].positionC.getXPosition());
+            chargePoint1.setYPosition(warehouse.listChargingPoints[i].positionC.getYPosition());
+
+
+            path1 = PathFinder.findPath(warehouse, rPosition, chargePoint1);
+
+            if (!path1.empty() && (path.empty() || path1.size() < path.size())) {
+                path = path1;
+                index = i;
+                freeSpot = true;
+            }
+
+        }
+    }
+    if (!freeSpot) {
+        std::cout <<"No available charging stations at the moment" << std::endl;
+        return;
+    }
+
+    std::cout<<"Sending Robot to " << warehouse.listChargingPoints[index].ID << " charger..." << std::endl;
+
+    r.setRoute(path);
+}
+
+void Simulation::continueTask(Robot &r) {
+
 }
 
 Simulation::~Simulation(){}

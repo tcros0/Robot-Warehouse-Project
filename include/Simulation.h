@@ -13,6 +13,7 @@
 class Simulation {
     friend class FileManager;
 
+
 private:
     SimulationConfig config;
     Warehouse warehouse;
@@ -24,6 +25,8 @@ private:
     int currentTime{};
     void sendToCharge(Robot& r);
     void continueTask(Robot& r);
+
+    int taskID{};
 
 public:
 
@@ -37,6 +40,8 @@ public:
     void assignTask();
     void inspectRobot();
     void showTaskStatus();
+
+    void setTaskID(int id);
 
     void ShowPath();
     void displayPath(const std::vector<Position>& path) const;
