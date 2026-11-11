@@ -1,22 +1,18 @@
-//
-// Created by Plokiu on 10/22/2026.
-// Updated bu Farrokh880 10/31/2026
-
-#ifndef WAREHOUSEROBOTSIM_FILEMANAGER_H
-#define WAREHOUSEROBOTSIM_FILEMANAGER_H
+#ifndef FILEMANAGER_H
+#define FILEMANAGER_H
 
 #include <string>
 #include <vector>
 #include "Position.h"
+#include "SimulationConfig.h"
 
 class FileManager {
-private:
-    std::vector<Position> pickups_;
-    std::vector<Position> deliveries_;
-
-    static std::vector<Position> readPositions(const std::string& filename);
-
 public:
+    //Reads the whole warehouse setup (size, points, walls, robots) from one file
+    SimulationConfig loadConfig(const std::string& filename);
+    void saveConfig(const SimulationConfig& config, const std::string& filename) const;
+
+    //Original functions (Farrokh)
     void loadPickups(const std::string& filename);
     void loadDeliveries(const std::string& filename);
 
@@ -25,6 +21,12 @@ public:
 
     size_t pickupCount() const;
     size_t deliveryCount() const;
+
+private:
+    std::vector<Position> readPositions(const std::string& filename);
+
+    std::vector<Position> pickups_;
+    std::vector<Position> deliveries_;
 };
 
-#endif 
+#endif //FILEMANAGER_H

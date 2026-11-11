@@ -38,11 +38,11 @@ std::vector<Position> PathFinding::findPath(const Warehouse& warehouse, const Po
 
     std::queue<Position> toVisit;
     toVisit.push(start);
-    visited[start.getYPosition()][start.getXPosition()] = true;
+    visited[start.getXPosition()][start.getYPosition()] = true;
 
-    // the 4 directions: up, down, left, right (as column change, row change)
-    const int dCol[4] = { 0, 0, -1, 1 };
+    // the 4 directions: up, down, left, right (as row change, column change)
     const int dRow[4] = { -1, 1, 0, 0 };
+    const int dCol[4] = { 0, 0, -1, 1 };
 
     bool found = false;
 
@@ -60,16 +60,16 @@ std::vector<Position> PathFinding::findPath(const Warehouse& warehouse, const Po
 
         for (int i = 0; i < 4; i++)
         {
-            Position next(current.getXPosition() + dCol[i],
-                          current.getYPosition() + dRow[i]);
+            Position next(current.getXPosition() + dRow[i],
+                          current.getYPosition() + dCol[i]);
 
             if (!isWalkable(warehouse, next))
             {
                 continue;   // wall or off the map
             }
 
-            int r = next.getYPosition();
-            int c = next.getXPosition();
+            int r = next.getXPosition();
+            int c = next.getYPosition();
 
             if (visited[r][c])
             {
@@ -94,7 +94,7 @@ std::vector<Position> PathFinding::findPath(const Warehouse& warehouse, const Po
              step.getYPosition() == start.getYPosition()))
     {
         path.push_back(step);
-        step = cameFrom[step.getYPosition()][step.getXPosition()];
+        step = cameFrom[step.getXPosition()][step.getYPosition()];
     }
 
     reverse(path.begin(), path.end());   // now start -> goal
