@@ -50,6 +50,8 @@ public:
     int getBatteryLevel() const;
     std::string getStatus() const;
 
+    void setStatus(std::string newStatus);
+
     // Move the robot
     bool moveUp();
     bool moveDown();

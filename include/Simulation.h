@@ -5,6 +5,7 @@
 #include "Robot.h"
 #include "TaskManager.h"
 #include "PathFinding.h"
+#include "RobotManager.h"
 
 #include <vector>
 
@@ -19,6 +20,8 @@ private:
     Warehouse warehouse;
     TaskManager taskManager;
     PathFinding pathfinding;
+    RobotManager robotManager;
+
 
     std::vector<Robot> robots;
 
