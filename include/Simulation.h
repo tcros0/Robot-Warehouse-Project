@@ -26,6 +26,9 @@ private:
     void sendToCharge(Robot& r);
     void continueTask(Robot& r);
 
+    void ShowPath();
+    void displayPath(const std::vector<Position>& path) const;
+
     int taskID{};
 
 public:
@@ -43,8 +46,7 @@ public:
 
     void setTaskID(int id);
 
-    void ShowPath();
-    void displayPath(const std::vector<Position>& path) const;
+
 
     void buildFromConfig();//uses config to reset map
 
