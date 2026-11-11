@@ -42,8 +42,7 @@ public:
     Robot(int robotId, Position startPosition);
     Robot(int robotId, Position startPosition, int batteryLevel);
 
-    Robot(int robotId, Position startPosition,
-          int batteryLevel);
+    //Robot(int robotId, Position startPosition, int batteryLevel);
 
     // Get robot information
     int getId() const;

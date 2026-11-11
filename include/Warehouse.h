@@ -26,6 +26,7 @@ struct chargingPoint {
 };
 
 class Warehouse {
+    friend class Simulation;
 private:
     int length{};
     int width{};
