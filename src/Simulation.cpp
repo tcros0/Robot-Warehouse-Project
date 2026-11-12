@@ -164,9 +164,10 @@ void Simulation::run() {
         "\n7.Reset Warehouse"
         "\n8.Advance time"
         "\n9.Exit"
-        "\n10.Display Path" <<std::endl;
+        "\n10.Display Path"
+        "\n11.Assign Task" << std::endl;
 
-        option = getInput<int> ("Enter Option: ", 1, 10);
+        option = getInput<int> ("Enter Option: ", 1, 11);
 
 
         switch(option){
@@ -201,6 +202,9 @@ void Simulation::run() {
             case 10:
                 ShowPath();
                 break;
+            case 11:
+                assignTask();
+                break; 
         }
     }
 
@@ -414,6 +418,31 @@ void Simulation::createTask()
 
     std::cout << "Task created successfully!\n";
 }
+
+void Simulation::assignTask()
+{
+    int taskId = getInput<int>("Enter Task ID: ");
+    int robotId = getInput<int>("Enter Robot ID: ");
+
+    for (Robot& robot : robots)
+    {
+        if (robot.getId() == robotId)
+        {
+            if (taskManager.assignTask(taskId, robot))
+            {
+                std::cout << "Task assigned successfully!\n";
+            }
+            else
+            {
+                std::cout << "Unable to assign task.\n";
+            }
+            return;
+        }
+    }
+
+    std::cout << "Robot not found.\n";
+}
+
 
 
 
