@@ -184,8 +184,8 @@ void Simulation::run() {
             case 4:
                 showTaskStatus();
                 break;
-            case 5:
-                std::cout<<"Nothing was implemented here yet!" << std::endl;
+           case 5:
+                createWarehouseLayout();
                 break;
             case 6:
                 std::cout<<"Nothing was implemented here yet!" << std::endl;
