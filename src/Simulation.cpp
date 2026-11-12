@@ -174,7 +174,7 @@ void Simulation::run() {
                 warehouse.display();
                 break;
             case 2:
-                std::cout<<"Nothing was implemented here yet!" << std::endl;
+                inspectRobot();
                 break;
             case 3:
                 std::cout<<"Nothing was implemented here yet!" << std::endl;
@@ -327,5 +327,29 @@ void Simulation::continueTask(Robot &r) {
 }
 
 Simulation::~Simulation(){}
+
+ // Display all robots
+void Simulation::inspectRobot()
+{
+    if (robots.empty())
+    {
+        std::cout << "No robots available.\n";
+        return;
+    }
+
+    for (const Robot& robot : robots)
+    {
+        Position pos = robot.getPosition();
+
+        std::cout << "\nRobot ID: " << robot.getId()
+                  << "\nPosition: (" << pos.getXPosition()
+                  << ", " << pos.getYPosition() << ")"
+                  << "\nBattery: " << robot.getBatteryLevel() << "%"
+                  << "\nStatus: " << robot.getStatus()
+                  << "\nCurrent Task: " << robot.getCurrentTaskId()
+                  << "\n";
+    }
+}
+
 
 
