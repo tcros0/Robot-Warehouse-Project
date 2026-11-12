@@ -180,7 +180,7 @@ void Simulation::run() {
                 std::cout<<"Nothing was implemented here yet!" << std::endl;
                 break;
             case 4:
-                std::cout<<"Nothing was implemented here yet!" << std::endl;
+                showTaskStatus();
                 break;
             case 5:
                 std::cout<<"Nothing was implemented here yet!" << std::endl;
@@ -350,6 +350,34 @@ void Simulation::inspectRobot()
                   << "\n";
     }
 }
+
+void Simulation::showTaskStatus()
+{
+    const std::vector<Task>& tasks = taskManager.getTasks();
+
+    if (tasks.empty())
+    {
+        std::cout << "No tasks available.\n";
+        return;
+    }
+
+    for (const Task& task : tasks)
+    {
+        Position pickup = task.getPickupLocation();
+        Position delivery = task.getDeliveryLocation();
+
+        std::cout << "\nTask ID: " << task.getTaskId()
+                  << "\nItem ID: " << task.getItemId()
+                  << "\nPickup: (" << pickup.getXPosition()
+                  << ", " << pickup.getYPosition() << ")"
+                  << "\nDelivery: (" << delivery.getXPosition()
+                  << ", " << delivery.getYPosition() << ")"
+                  << "\nStatus: " << task.getStatus()
+                  << "\nAssigned Robot: " << task.getAssignedRobotId()
+                  << "\n";
+    }
+}
+
 
 
 
