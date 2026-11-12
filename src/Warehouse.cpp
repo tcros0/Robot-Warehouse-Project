@@ -218,6 +218,17 @@ bool Warehouse::setCell(int x, int y, char symbol) {
     warehouseMap[x][y] = symbol;
     return true;
 }
+bool Warehouse::removeWall(int row, int col)
+{
+    if (!isInBounds(row, col))
+        return false;
+
+    if (warehouseMap[row][col] != '#')
+        return false;
+
+    warehouseMap[row][col] = '.';
+    return true;
+}
 
 int Warehouse::getLength() const{
     return length;
