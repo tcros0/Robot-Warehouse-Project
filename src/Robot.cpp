@@ -41,6 +41,25 @@ Robot::Robot(int robotId, Position startPosition, int battery)
         status = "Out of Battery";
 }
 
+
+ // Create a robot with warehouse size and battery
+Robot::Robot(int robotId, Position startPosition,
+             int width, int height, int battery)
+    : Robot(robotId, startPosition, width, height)
+{
+    if (battery < 0)
+        battery = 0;
+
+    if (battery > 100)
+        battery = 100;
+
+    batteryLevel = battery;
+
+    if (batteryLevel == 0)
+        status = "Out of Battery";
+}
+
+
 // Get robot information
 int Robot::getId() const
 {
