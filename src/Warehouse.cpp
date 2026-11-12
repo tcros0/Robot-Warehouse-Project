@@ -50,10 +50,25 @@ void Warehouse::createMap() {
 }
 
 void Warehouse::createMap(int x, int y) {
-    this->length = x;
-    this->width = y;
-    warehouseMap.assign(x, std::vector<char>(y, '.'));
+    if (x <= 0 || y <= 0) {
+        std::cout << "Invalid warehouse dimensions.\n";
+        return;
+    }
+
+    length = x;
+    width = y;
+
+    // Clear the previous warehouse locations
+    listPickupPoints.clear();
+    listDeliveryPoints.clear();
+    listChargingPoints.clear();
+
+    // Create an empty warehouse map
+    warehouseMap.assign(length, std::vector<char>(width, '.'));
+
+    std::cout << "New warehouse created successfully.\n";
 }
+
 
 //Pickup points are denoted with a P
 void Warehouse::setPickupPoint(int row, int col, int ID) {
