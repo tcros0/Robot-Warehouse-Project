@@ -66,6 +66,7 @@ public:
     void setWidth(int width);
 
     bool setCell(int row, int col, char symbol);
+    bool removeWall(int row, int col);
     char getCell(int row, int col) const;
     void display() const;
 
