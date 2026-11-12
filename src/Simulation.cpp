@@ -61,7 +61,8 @@ void Simulation::buildFromConfig() {
     //Populates robot vector with robot objects IF they are in bounds and not on a wall
     for (const auto& rc : config.robots) {
         if (warehouse.isInBounds(rc.position.getXPosition(), rc.position.getYPosition())&&(warehouse.getCell(rc.position.getXPosition(), rc.position.getYPosition()) != '#')) {
-            robots.emplace_back(rc.ID, rc.position, rc.battery);
+           robots.emplace_back(rc.ID, rc.position,
+           config.width, config.length, rc.battery);
         }
         else {
             std::cout << "Robot " << rc.ID << " skipped: start position (" << rc.position.getXPosition()  << ", " << rc.position.getYPosition() << ") is out of bounds or a wall.\n";
@@ -225,17 +226,48 @@ void Simulation::advanceTime()
         if (robot.getBatteryLevel() == 0)
             continue;
 
-        if (robot.isLowBattery())
-        {
-            robot.setStatus("Low Battery");
-            sendToCharge(robot);
-        }
+        if (robot.isLowBattery() &&
+        robot.getStatus() != "To Charge")
+    {
+        robot.setStatus("To Charge");
+        sendToCharge(robot);
+    }
+        
 
         if (robot.moveAlongRoute())
         {
             std::cout << "Robot " << robot.getId()
                       << " moved.\n";
         }
+        
+if (robot.getStatus() == "To Charge")
+{
+    Position pos = robot.getPosition();
+
+    for (const auto& station : warehouse.listChargingPoints)
+    {
+        Position charger = station.positionC;
+
+        if (pos.getXPosition() == charger.getXPosition() &&
+            pos.getYPosition() == charger.getYPosition())
+        {
+            robot.chargeBattery();
+
+            std::cout << "Robot " << robot.getId()
+                      << " charging: "
+                      << robot.getBatteryLevel() << "%\n";
+
+            if (robot.getBatteryLevel() == 100)
+            {
+                robot.setStatus("Idle");
+                continueTask(robot);
+            }
+
+            break;
+        }
+    }
+}
+
     }
 }
 
@@ -440,7 +472,8 @@ void Simulation::assignTask()
         if (robot.getId() == robotId)
         {
             if (taskManager.assignTask(taskId, robot))
-            {
+            {   
+                continueTask(robot);
                 std::cout << "Task assigned successfully!\n";
             }
             else
