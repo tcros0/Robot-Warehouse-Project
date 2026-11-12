@@ -1,5 +1,4 @@
 
-
 #include "Robot.h"
 
 #include <utility>
@@ -41,8 +40,7 @@ Robot::Robot(int robotId, Position startPosition, int battery)
         status = "Out of Battery";
 }
 
-
- // Create a robot with warehouse size and battery
+// Create a robot with warehouse size and battery
 Robot::Robot(int robotId, Position startPosition,
              int width, int height, int battery)
     : Robot(robotId, startPosition, width, height)
@@ -58,7 +56,6 @@ Robot::Robot(int robotId, Position startPosition,
     if (batteryLevel == 0)
         status = "Out of Battery";
 }
-
 
 // Get robot information
 int Robot::getId() const
@@ -81,7 +78,8 @@ std::string Robot::getStatus() const
     return status;
 }
 
-void Robot::setStatus(std::string newStatus) {
+void Robot::setStatus(std::string newStatus)
+{
     status = std::move(newStatus);
 }
 
@@ -91,32 +89,8 @@ int Robot::getCurrentTaskId() const
     return currentTaskId;
 }
 
-// Move the robot up
+// Move up (decrease row)
 bool Robot::moveUp()
-{
-    if (batteryLevel <= 0 || status == "Broken" ||
-        position.getYPosition() <= 0)
-        return false;
-
-    position.setYPosition(position.getYPosition() - 1);
-    drainBattery(1);
-    return true;
-}
-
-// Move the robot down
-bool Robot::moveDown()
-{
-    if (batteryLevel <= 0 || status == "Broken" ||
-        position.getYPosition() >= warehouseHeight - 1)
-        return false;
-
-    position.setYPosition(position.getYPosition() + 1);
-    drainBattery(1);
-    return true;
-}
-
-// Move the robot left
-bool Robot::moveLeft()
 {
     if (batteryLevel <= 0 || status == "Broken" ||
         position.getXPosition() <= 0)
@@ -127,14 +101,38 @@ bool Robot::moveLeft()
     return true;
 }
 
-// Move the robot right
-bool Robot::moveRight()
+// Move down (increase row)
+bool Robot::moveDown()
 {
     if (batteryLevel <= 0 || status == "Broken" ||
-        position.getXPosition() >= warehouseWidth - 1)
+        position.getXPosition() >= warehouseHeight - 1)
         return false;
 
     position.setXPosition(position.getXPosition() + 1);
+    drainBattery(1);
+    return true;
+}
+
+// Move left (decrease column)
+bool Robot::moveLeft()
+{
+    if (batteryLevel <= 0 || status == "Broken" ||
+        position.getYPosition() <= 0)
+        return false;
+
+    position.setYPosition(position.getYPosition() - 1);
+    drainBattery(1);
+    return true;
+}
+
+// Move right (increase column)
+bool Robot::moveRight()
+{
+    if (batteryLevel <= 0 || status == "Broken" ||
+        position.getYPosition() >= warehouseWidth - 1)
+        return false;
+
+    position.setYPosition(position.getYPosition() + 1);
     drainBattery(1);
     return true;
 }
@@ -235,13 +233,13 @@ bool Robot::moveAlongRoute()
     bool moved = false;
 
     if (dx == 1 && dy == 0)
-        moved = moveRight();
-    else if (dx == -1 && dy == 0)
-        moved = moveLeft();
-    else if (dx == 0 && dy == 1)
         moved = moveDown();
-    else if (dx == 0 && dy == -1)
+    else if (dx == -1 && dy == 0)
         moved = moveUp();
+    else if (dx == 0 && dy == 1)
+        moved = moveRight();
+    else if (dx == 0 && dy == -1)
+        moved = moveLeft();
     else if (dx == 0 && dy == 0)
         moved = true;
 
