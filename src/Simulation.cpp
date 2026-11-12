@@ -177,7 +177,7 @@ void Simulation::run() {
                 inspectRobot();
                 break;
             case 3:
-                std::cout<<"Nothing was implemented here yet!" << std::endl;
+                createTask();
                 break;
             case 4:
                 showTaskStatus();
@@ -376,6 +376,43 @@ void Simulation::showTaskStatus()
                   << "\nAssigned Robot: " << task.getAssignedRobotId()
                   << "\n";
     }
+}
+
+void Simulation::createTask()
+{
+    int itemId = getInput<int>("Enter Item ID: ", 1, 1000000);
+
+    int pickupX = getInput<int>(
+        "Pickup row: ", 0, config.length - 1);
+
+    int pickupY = getInput<int>(
+        "Pickup column: ", 0, config.width - 1);
+
+    int deliveryX = getInput<int>(
+        "Delivery row: ", 0, config.length - 1);
+
+    int deliveryY = getInput<int>(
+        "Delivery column: ", 0, config.width - 1);
+
+    Position pickup(pickupX, pickupY);
+    Position delivery(deliveryX, deliveryY);
+
+    if (warehouse.getCell(pickupX, pickupY) == '#' ||
+        warehouse.getCell(deliveryX, deliveryY) == '#')
+    {
+        std::cout << "Location cannot be a wall.\n";
+        return;
+    }
+
+    if (!taskManager.isPickupAvailable(pickup))
+    {
+        std::cout << "Pickup location is already in use.\n";
+        return;
+    }
+
+    taskManager.createTask(itemId, pickup, delivery);
+
+    std::cout << "Task created successfully!\n";
 }
 
 
