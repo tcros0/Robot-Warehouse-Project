@@ -544,6 +544,39 @@ void Simulation::assignTask()
     std::cout << "Robot not found.\n";
 }
 
+void Simulation::createWarehouseLayout()
+{
+    int rows = getInput<int>("Enter number of rows: ", 1, 100);
+    int cols = getInput<int>("Enter number of columns: ", 1, 100);
+
+    // Confirm before replacing the current warehouse
+    int confirm = getInput<int>(
+        "Replace current warehouse? (1 = Yes, 0 = No): ", 0, 1);
+
+    if (confirm == 0) {
+        std::cout << "Warehouse creation cancelled.\n";
+        return;
+    }
+
+    // Create a new empty warehouse
+    warehouse.createMap(rows, cols);
+
+    // Remove robots from the previous layout
+    robots.clear();
+
+    // Clear tasks from the previous layout
+    taskManager = TaskManager();
+
+    currentTime = 0;
+
+    // Update dimensions used by other functions
+    config.length = rows;
+    config.width = cols;
+
+    std::cout << "New warehouse layout created!\n";
+    warehouse.display();
+}
+
 
 
 
