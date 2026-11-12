@@ -194,7 +194,7 @@ void Simulation::run() {
                 std::cout<<"Warehouse was reset to initial settings";
                 break;
             case 8:
-                std::cout<<"Nothing was implemented here yet!" << std::endl;
+                 advanceTime();
                 break;
             case 9:
                 done = true;
@@ -210,24 +210,35 @@ void Simulation::run() {
 
 }
 
-void Simulation::advanceTime() {//updates everything
+
+void Simulation::advanceTime()
+{
     currentTime++;
-    //need robotManager
 
-    //check robot battery levels
+    std::cout << "\nTime: " << currentTime << std::endl;
 
-    std::vector<Robot> robotList= robotManager.getRobots();
-    for (int i = 0; i<robotList.size();i++) {
-        if (robotList[i].isLowBattery()) {
-            robotList[i].setStatus("lowBattery");
+    for (Robot& robot : robots)
+    {
+        if (robot.getStatus() == "Broken")
+            continue;
+
+        if (robot.getBatteryLevel() == 0)
+            continue;
+
+        if (robot.isLowBattery())
+        {
+            robot.setStatus("Low Battery");
+            sendToCharge(robot);
         }
 
-        if (robotList[i].isLowBattery()&& robotList[i].getStatus() != "lowBattery") {
-            robotList[i].setStatus("toCharge");
-            sendToCharge(robotList[i]);
+        if (robot.moveAlongRoute())
+        {
+            std::cout << "Robot " << robot.getId()
+                      << " moved.\n";
         }
     }
 }
+
 
 void Simulation::setTaskID(int id) {
     taskID = id;
