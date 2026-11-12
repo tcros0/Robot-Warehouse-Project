@@ -186,10 +186,9 @@ void Simulation::run() {
                 break;
            case 5:
                 createWarehouseLayout();
-                break;
             case 6:
-                std::cout<<"Nothing was implemented here yet!" << std::endl;
-                break;
+                 editWarehouse();
+                break;     
             case 7:
                 buildFromConfig();
                 std::cout<<"Warehouse was reset to initial settings";
