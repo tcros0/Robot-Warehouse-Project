@@ -212,6 +212,7 @@ void Simulation::run() {
 }
 
 
+
 void Simulation::advanceTime()
 {
     currentTime++;
@@ -220,57 +221,113 @@ void Simulation::advanceTime()
 
     for (Robot& robot : robots)
     {
-        if (robot.getStatus() == "Broken")
+        if (robot.getStatus() == "Broken" ||
+            robot.getBatteryLevel() == 0)
             continue;
 
-        if (robot.getBatteryLevel() == 0)
-            continue;
-
+        // Send robot to charge when battery is low
         if (robot.isLowBattery() &&
-        robot.getStatus() != "To Charge")
-    {
-        robot.setStatus("To Charge");
-        sendToCharge(robot);
-    }
-        
+            robot.getStatus() != "To Charge")
+        {
+            robot.setStatus("To Charge");
+            sendToCharge(robot);
+        }
 
+        // Move robot along its route
         if (robot.moveAlongRoute())
         {
             std::cout << "Robot " << robot.getId()
                       << " moved.\n";
         }
-        
-if (robot.getStatus() == "To Charge")
-{
-    Position pos = robot.getPosition();
 
-    for (const auto& station : warehouse.listChargingPoints)
-    {
-        Position charger = station.positionC;
+        Position pos = robot.getPosition();
 
-        if (pos.getXPosition() == charger.getXPosition() &&
-            pos.getYPosition() == charger.getYPosition())
+        // Charge robot at charging station
+        if (robot.getStatus() == "To Charge")
         {
-            robot.chargeBattery();
-
-            std::cout << "Robot " << robot.getId()
-                      << " charging: "
-                      << robot.getBatteryLevel() << "%\n";
-
-            if (robot.getBatteryLevel() == 100)
+            for (const auto& station :
+                 warehouse.listChargingPoints)
             {
-                robot.setStatus("Idle");
+                Position charger = station.positionC;
+
+                if (pos.getXPosition() ==
+                        charger.getXPosition() &&
+                    pos.getYPosition() ==
+                        charger.getYPosition())
+                {
+                    robot.chargeBattery();
+
+                    std::cout << "Robot "
+                              << robot.getId()
+                              << " charging: "
+                              << robot.getBatteryLevel()
+                              << "%\n";
+
+                    if (robot.getBatteryLevel() == 100)
+                    {
+                        robot.setStatus("Idle");
+                        continueTask(robot);
+                    }
+                    break;
+                }
+            }
+            continue;
+        }
+
+        // Check the robot's assigned task
+        int taskId = robot.getCurrentTaskId();
+
+        if (taskId == -1)
+            continue;
+
+        Task* task = taskManager.getTask(taskId);
+
+        if (task == nullptr ||
+            task->getStatus() == "Completed")
+            continue;
+
+        Position pickup = task->getPickupLocation();
+        Position delivery = task->getDeliveryLocation();
+
+        // Pick up the item at pickup location
+        if (!robot.isCarryingItem() &&
+            pos.getXPosition() == pickup.getXPosition() &&
+            pos.getYPosition() == pickup.getYPosition())
+        {
+            std::shared_ptr<Item> item =
+                std::make_shared<Item>(
+                    task->getItemId(),
+                    "Item " + std::to_string(task->getItemId())
+                );
+
+            if (robot.pickUpItem(item))
+            {
+                std::cout << "Robot " << robot.getId()
+                          << " picked up Item "
+                          << task->getItemId() << ".\n";
+
                 continueTask(robot);
             }
+        }
 
-            break;
+        // Deliver the item at delivery location
+        else if (robot.isCarryingItem() &&
+                 pos.getXPosition() ==
+                     delivery.getXPosition() &&
+                 pos.getYPosition() ==
+                     delivery.getYPosition())
+        {
+            robot.dropOffItem();
+
+            taskManager.markTaskCompleted(taskId);
+            robot.setCurrentTaskId(-1);
+
+            std::cout << "Robot " << robot.getId()
+                      << " completed Task "
+                      << taskId << ".\n";
         }
     }
 }
-
-    }
-}
-
 
 void Simulation::setTaskID(int id) {
     taskID = id;
