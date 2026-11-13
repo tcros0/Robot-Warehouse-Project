@@ -15,6 +15,14 @@ SimulationConfig FileManager::loadConfig(const std::string& filename) {
     SimulationConfig config;
     bool sizeFound = false;
 
+    //Items are attached to their pickup point after the whole file is read
+    struct PendingItem {
+        int pickupID;
+        int itemID;
+        int lineNum;
+    };
+    std::vector<PendingItem> pendingItems;
+
     std::string line;
     int lineNum = 0;
 
@@ -93,6 +101,13 @@ SimulationConfig FileManager::loadConfig(const std::string& filename) {
             rc.battery = battery;
             config.robots.push_back(rc);
         }
+        else if (keyword == "ITEM") {
+            int pickupID, itemID;
+            if (!(iss >> pickupID >> itemID)) {
+                throw std::runtime_error("Bad ITEM (expected: ITEM pickupID itemID)" + where);
+            }
+            pendingItems.push_back({pickupID, itemID, lineNum});
+        }
         else {
             throw std::runtime_error("Unknown keyword '" + keyword + "'" + where);
         }
@@ -100,6 +115,23 @@ SimulationConfig FileManager::loadConfig(const std::string& filename) {
 
     if (!sizeFound) {
         throw std::runtime_error("No SIZE line in " + filename);
+    }
+
+    //Attach each item to the pickup point with the matching ID
+    for (const PendingItem& pi : pendingItems) {
+        bool attached = false;
+        for (pickupPoint& p : config.pickupPoints) {
+            if (p.ID == pi.pickupID) {
+                //Item still needs a name, so a default one is generated from the ID
+                p.items.push_back(std::make_shared<Item>(pi.itemID, "Item " + std::to_string(pi.itemID)));
+                attached = true;
+                break;
+            }
+        }
+        if (!attached) {
+            throw std::runtime_error("ITEM refers to unknown pickup ID " + std::to_string(pi.pickupID) +
+                                     " in " + filename + " at line " + std::to_string(pi.lineNum));
+        }
     }
 
     return config;
@@ -161,6 +193,13 @@ void FileManager::saveConfig(const SimulationConfig& config, const std::string& 
     file << "\n// ROBOT ID row col battery\n";
     for (const RobotConfig& r : config.robots) {
         file << "ROBOT " << r.ID << " " << r.position.getXPosition() << " " << r.position.getYPosition() << " " << r.battery << "\n";
+    }
+
+    file << "\n// ITEM pickupID itemID\n";
+    for (const pickupPoint& p : config.pickupPoints) {
+        for (const auto& item : p.items) {
+            file << "ITEM " << p.ID << " " << item->getId() << "\n";
+        }
     }
 }
 

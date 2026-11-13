@@ -72,5 +72,10 @@ public:
     char getCell(int row, int col) const;
     void display() const;
 
+    //Item handling by position (tasks store positions, not point IDs)
+    bool addItemAtPickup(const Position& pos, std::shared_ptr<Item> item);
+    std::shared_ptr<Item> takeItemFromPickup(const Position& pos, int itemId);
+    bool addItemAtDelivery(const Position& pos, std::shared_ptr<Item> item);
+
     ~Warehouse();
 };

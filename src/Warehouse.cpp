@@ -272,4 +272,54 @@ void Warehouse::display() const {
     }
 }
 
+//Adds an item to the pickup point at this position
+bool Warehouse::addItemAtPickup(const Position& pos, std::shared_ptr<Item> item) {
+    if (!item) {
+        return false;
+    }
+
+    for (pickupPoint& p : listPickupPoints) {   // & so the real struct is changed
+        if (p.positionPU.getXPosition() == pos.getXPosition() &&
+            p.positionPU.getYPosition() == pos.getYPosition()) {
+            p.items.push_back(item);
+            return true;
+            }
+    }
+    return false;   // no pickup point at this position
+}
+
+//Removes the item with this ID from the pickup point at this position and returns it (nullptr if not found)
+std::shared_ptr<Item> Warehouse::takeItemFromPickup(const Position& pos, int itemId) {
+    for (pickupPoint& p : listPickupPoints) {
+        if (p.positionPU.getXPosition() == pos.getXPosition() &&
+            p.positionPU.getYPosition() == pos.getYPosition()) {
+
+            for (int i = 0; i < p.items.size(); i++) {
+                if (p.items[i]->getId() == itemId) {
+                    std::shared_ptr<Item> item = p.items[i];
+                    p.items.erase(p.items.begin() + i);   // erase takes a position, not a value
+                    return item;
+                }
+            }
+            }
+    }
+    return nullptr;   // item not at this pickup point
+}
+
+//Adds an item to the delivery point at this position
+bool Warehouse::addItemAtDelivery(const Position& pos, std::shared_ptr<Item> item) {
+    if (!item) {
+        return false;
+    }
+
+    for (deliveryPoint& d : listDeliveryPoints) {
+        if (d.positionD.getXPosition() == pos.getXPosition() &&
+            d.positionD.getYPosition() == pos.getYPosition()) {
+            d.items.push_back(item);
+            return true;
+            }
+    }
+    return false;   // no delivery point at this position
+}
+
 Warehouse::~Warehouse() {};
