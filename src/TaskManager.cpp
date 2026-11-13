@@ -118,3 +118,8 @@ bool TaskManager::reassignTask(int taskId, Robot& robot)
     return true;
 }
 
+
+// Empties list
+void TaskManager::resetList() {
+    tasks.clear();
+}

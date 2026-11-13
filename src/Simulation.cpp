@@ -69,6 +69,9 @@ void Simulation::buildFromConfig() {
         }
     }
 
+    //resets task list
+    taskManager.resetList();
+
 }
 
 void Simulation::ShowPath() {
@@ -188,11 +191,11 @@ void Simulation::run() {
                 createWarehouseLayout();
                 break;
             case 6:
-                 editWarehouse();
+                editWarehouse();
                 break;     
             case 7:
                 buildFromConfig();
-                std::cout<<"Warehouse was reset to initial settings";
+                std::cout<<"Warehouse was reset to initial settings" << std::endl;
                 break;
             case 8:
                  advanceTime();
@@ -227,7 +230,7 @@ void Simulation::advanceTime()
 
         // Send robot to charge when battery is low
         if (robot.isLowBattery() &&
-            robot.getStatus() != "To Charge")
+            robot.getStatus() != "To Charge" && warehouse.chargingStationOpen())
         {
             robot.setStatus("To Charge");
             sendToCharge(robot);
@@ -245,7 +248,7 @@ void Simulation::advanceTime()
         // Charge robot at charging station
         if (robot.getStatus() == "To Charge")
         {
-            for (const auto& station :
+            for (auto& station :
                  warehouse.listChargingPoints)
             {
                 Position charger = station.positionC;
@@ -266,6 +269,7 @@ void Simulation::advanceTime()
                     if (robot.getBatteryLevel() == 100)
                     {
                         robot.setStatus("Idle");
+                        station.free = true;   // release the charger reserved in sendToCharge
                         continueTask(robot);
                     }
                     break;
@@ -368,6 +372,7 @@ void Simulation::sendToCharge(Robot& r) {
 
     setTaskID(r.getCurrentTaskId());
 
+
     int index{};
     bool freeSpot = false;
 
@@ -397,6 +402,8 @@ void Simulation::sendToCharge(Robot& r) {
     }
 
     std::cout<<"Sending Robot to " << warehouse.listChargingPoints[index].ID << " charger..." << std::endl;
+
+    warehouse.listChargingPoints[index].free = false;
 
     r.setRoute(path);
 }
@@ -558,7 +565,7 @@ void Simulation::createWarehouseLayout()
         return;
     }
 
-    // Create a new empty warehouse
+    // Create a new empty warehouse (createMap also clears all P/D/C lists)
     warehouse.createMap(rows, cols);
 
     // Remove robots from the previous layout
@@ -569,9 +576,7 @@ void Simulation::createWarehouseLayout()
 
     currentTime = 0;
 
-    // Update dimensions used by other functions
-    config.length = rows;
-    config.width = cols;
+    // config is NOT changed, so Reset still restores the original layout from the file
 
     std::cout << "New warehouse layout created!\n";
     warehouse.display();

@@ -211,6 +211,15 @@ Position Warehouse::getChargingLocation(int ID) const {
     //return listChargingPoints[ID].positionC;
 }
 
+bool Warehouse::chargingStationOpen() const {
+    for (int i = 0; i<listChargingPoints.size(); i++) {
+        if (listChargingPoints[i].free == true) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool Warehouse::setCell(int x, int y, char symbol) {
     if (!isInBounds(x, y) || warehouseMap[x][y] != '.') {
         return false;
