@@ -46,7 +46,10 @@ public:
     void assignTask();
     void inspectRobot();
     void showTaskStatus();
-
+        
+    void createWarehouseLayout();
+    void editWarehouse();
+        
     void setTaskID(int id);
 
 

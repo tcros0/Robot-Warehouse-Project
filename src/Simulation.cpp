@@ -184,12 +184,12 @@ void Simulation::run() {
             case 4:
                 showTaskStatus();
                 break;
-            case 5:
-                std::cout<<"Nothing was implemented here yet!" << std::endl;
+           case 5:
+                createWarehouseLayout();
                 break;
             case 6:
-                std::cout<<"Nothing was implemented here yet!" << std::endl;
-                break;
+                 editWarehouse();
+                break;     
             case 7:
                 buildFromConfig();
                 std::cout<<"Warehouse was reset to initial settings";
@@ -543,6 +543,135 @@ void Simulation::assignTask()
 
     std::cout << "Robot not found.\n";
 }
+
+void Simulation::createWarehouseLayout()
+{
+    int rows = getInput<int>("Enter number of rows: ", 1, 100);
+    int cols = getInput<int>("Enter number of columns: ", 1, 100);
+
+    // Confirm before replacing the current warehouse
+    int confirm = getInput<int>(
+        "Replace current warehouse? (1 = Yes, 0 = No): ", 0, 1);
+
+    if (confirm == 0) {
+        std::cout << "Warehouse creation cancelled.\n";
+        return;
+    }
+
+    // Create a new empty warehouse
+    warehouse.createMap(rows, cols);
+
+    // Remove robots from the previous layout
+    robots.clear();
+
+    // Clear tasks from the previous layout
+    taskManager = TaskManager();
+
+    currentTime = 0;
+
+    // Update dimensions used by other functions
+    config.length = rows;
+    config.width = cols;
+
+    std::cout << "New warehouse layout created!\n";
+    warehouse.display();
+}
+
+void Simulation::editWarehouse()
+{
+    int choice;
+
+    do {
+        std::cout << "\nEdit Warehouse:"
+                  << "\n1. Add Wall"
+                  << "\n2. Remove Wall"
+                  << "\n3. Add Pickup Point"
+                  << "\n4. Add Delivery Point"
+                  << "\n5. Add Charging Station"
+                  << "\n6. Back to Main Menu\n";
+
+        choice = getInput<int>("Enter option: ", 1, 6);
+
+        if (choice == 6)
+            break;
+
+        int row = getInput<int>(
+            "Enter row: ", 0, warehouse.getLength() - 1);
+
+        int col = getInput<int>(
+            "Enter column: ", 0, warehouse.getWidth() - 1);
+
+        if (choice == 1) {
+            if (warehouse.getCell(row, col) == '.') {
+                bool robotHere = false;
+                for (const Robot& robot : robots) {
+                    Position pos = robot.getPosition();
+                    if (pos.getXPosition() == row &&
+                        pos.getYPosition() == col) {
+                        robotHere = true;
+                        break;
+                    }
+                }
+
+                if (robotHere) {
+                    std::cout << "A robot is at this location.\n";
+                }
+                else if (warehouse.setCell(row, col, '#')) {
+                    std::cout << "Wall added successfully.\n";
+                }
+            }
+            else {
+                std::cout << "Location is not empty.\n";
+            }
+        }
+        else if (choice == 2) {
+            if (warehouse.removeWall(row, col))
+                std::cout << "Wall removed successfully.\n";
+            else
+                std::cout << "No wall at this location.\n";
+        }
+        else {
+            if (warehouse.getCell(row, col) != '.') {
+                std::cout << "Location is not empty.\n";
+                continue;
+            }
+
+            bool robotHere = false;
+            for (const Robot& robot : robots) {
+                Position pos = robot.getPosition();
+                if (pos.getXPosition() == row &&
+                    pos.getYPosition() == col) {
+                    robotHere = true;
+                    break;
+                }
+            }
+
+            if (robotHere) {
+                std::cout << "A robot is at this location.\n";
+                continue;
+            }
+
+            int id = getInput<int>("Enter point ID: ", 1, 1000000);
+
+            if (choice == 3) {
+                warehouse.setPickupPoint(row, col, id);
+                std::cout << "Pickup point added.\n";
+            }
+            else if (choice == 4) {
+                warehouse.setDeliveryPoint(row, col, id);
+                std::cout << "Delivery point added.\n";
+            }
+            else if (choice == 5) {
+                warehouse.setChargingPoint(row, col, id, true);
+                std::cout << "Charging station added.\n";
+            }
+        }
+
+        warehouse.display();
+
+    } while (choice != 6);
+}
+
 
 
 
