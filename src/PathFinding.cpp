@@ -100,3 +100,7 @@ std::vector<Position> PathFinding::findPath(const Warehouse& warehouse, const Po
     reverse(path.begin(), path.end());   // now start -> goal
     return path;
 }
+
+bool PathFinding::freeSpace(RobotManager robots, Position position) {
+    
+}

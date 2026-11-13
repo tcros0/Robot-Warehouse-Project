@@ -13,6 +13,7 @@ private:
 public:
     // Create an item
     Item(int itemId, const std::string& itemName);
+    ~Item();
 
     // Get item information
     int getId() const;

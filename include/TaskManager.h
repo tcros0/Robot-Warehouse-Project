@@ -49,5 +49,8 @@ public:
 
     // Reassign a task
     bool reassignTask(int taskId, Robot& robot);
+
+    // Deletes all tasks in list
+    void resetList();
 };
 

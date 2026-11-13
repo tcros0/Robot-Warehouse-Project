@@ -58,6 +58,8 @@ public:
     Position getDeliveryLocation(int id) const;
     Position getChargingLocation(int id) const;
 
+    bool chargingStationOpen() const;
+
     //returns size of warehouse
     int getLength() const;
     int getWidth() const;
