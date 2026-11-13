@@ -84,16 +84,16 @@ void Simulation::ShowPath() {
 
 
     //x = row, y = column
-    int startX = getInput<int>("Start row (0-" + std::to_string(config.length - 1) + "): ", 0, config.length - 1);
-    int startY = getInput<int>("Start column (0-" + std::to_string(config.width - 1) + "): ", 0, config.width - 1);
-    int goalX = getInput<int>("Goal row (0-" + std::to_string(config.length - 1) + "): ", 0, config.length - 1);
-    int goalY = getInput<int>("Goal column (0-" + std::to_string(config.width - 1) + "): ", 0, config.width - 1);
+    int startX = getInput<int>("Start row (0-" + std::to_string(warehouse.getLength() - 1) + "): ", 0, warehouse.getLength() - 1);
+    int startY = getInput<int>("Start column (0-" + std::to_string(warehouse.getWidth() - 1) + "): ", 0, warehouse.getWidth() - 1);
+    int goalX = getInput<int>("Goal row (0-" + std::to_string(warehouse.getLength() - 1) + "): ", 0, warehouse.getLength() - 1);
+    int goalY = getInput<int>("Goal column (0-" + std::to_string(warehouse.getWidth() - 1) + "): ", 0, warehouse.getWidth() - 1);
 
     while (!done) {
         if (warehouse.getCell(startX, startY) == '#') {
             std::cout << "Start is on a wall.\n";
-            startX = getInput<int>("Start row (0-" + std::to_string(config.length - 1) + "): ", 0, config.length - 1);
-            startY = getInput<int>("Start column (0-" + std::to_string(config.width - 1) + "): ", 0, config.width - 1);
+            startX = getInput<int>("Start row (0-" + std::to_string(warehouse.getLength() - 1) + "): ", 0, warehouse.getLength() - 1);
+            startY = getInput<int>("Start column (0-" + std::to_string(warehouse.getWidth() - 1) + "): ", 0, warehouse.getWidth() - 1);
         }
         else {
             done = true;
@@ -104,8 +104,8 @@ void Simulation::ShowPath() {
     while (!done) {
         if (startX == goalX && startY == goalY) {
             std::cout << "Start and goal are the same cell.\n";
-            goalX = getInput<int>("Goal row (0-" + std::to_string(config.length - 1) + "): ", 0, config.length - 1);
-            goalY = getInput<int>("Goal column (0-" + std::to_string(config.width - 1) + "): ", 0, config.width - 1);
+            goalX = getInput<int>("Goal row (0-" + std::to_string(warehouse.getLength() - 1) + "): ", 0, warehouse.getLength() - 1);
+            goalY = getInput<int>("Goal column (0-" + std::to_string(warehouse.getWidth() - 1) + "): ", 0, warehouse.getWidth() - 1);
 
         }
         else {
@@ -129,8 +129,8 @@ void Simulation::displayPath(const std::vector<Position>& path) const {
     }
 
     std::cout << "Path:" << std::endl;
-    for (int x = 0; x < config.length; x++) {
-        for (int y = 0; y < config.width; y++) {
+    for (int x = 0; x < warehouse.getLength(); x++) {
+        for (int y = 0; y < warehouse.getWidth(); y++) {
             bool onPath = false;
             for (const Position& p : path) {
                 if (p.getXPosition() == x && p.getYPosition() == y) {
@@ -198,7 +198,7 @@ void Simulation::run() {
                 std::cout<<"Warehouse was reset to initial settings" << std::endl;
                 break;
             case 8:
-                 advanceTime();
+                advanceTime();
                 break;
             case 9:
                 done = true;
@@ -232,8 +232,13 @@ void Simulation::advanceTime()
         if (robot.isLowBattery() &&
             robot.getStatus() != "To Charge" && warehouse.chargingStationOpen())
         {
-            robot.setStatus("To Charge");
-            sendToCharge(robot);
+            // Only mark it as charging if a reachable charger was actually found
+            if (sendToCharge(robot)) {
+                robot.setStatus("To Charge");
+            }
+            else {
+                std::cout << "Could not send Robot " << robot.getId() << " to charge" << std::endl;
+            }
         }
 
         // Move robot along its route
@@ -298,19 +303,28 @@ void Simulation::advanceTime()
             pos.getXPosition() == pickup.getXPosition() &&
             pos.getYPosition() == pickup.getYPosition())
         {
+            // Take the item out of the pickup point's list
             std::shared_ptr<Item> item =
-                std::make_shared<Item>(
-                    task->getItemId(),
-                    "Item " + std::to_string(task->getItemId())
-                );
+                warehouse.takeItemFromPickup(pickup, task->getItemId());
 
-            if (robot.pickUpItem(item))
+            if (item == nullptr)
+            {
+                std::cout << "Robot " << robot.getId()
+                          << ": Item " << task->getItemId()
+                          << " not found at pickup point.\n";
+            }
+            else if (robot.pickUpItem(item))
             {
                 std::cout << "Robot " << robot.getId()
                           << " picked up Item "
                           << task->getItemId() << ".\n";
 
                 continueTask(robot);
+            }
+            else
+            {
+                // Pickup failed, so put the item back where it was
+                warehouse.addItemAtPickup(pickup, item);
             }
         }
 
@@ -321,7 +335,9 @@ void Simulation::advanceTime()
                  pos.getYPosition() ==
                      delivery.getYPosition())
         {
-            robot.dropOffItem();
+            // Hand the item over to the delivery point
+            std::shared_ptr<Item> delivered = robot.dropOffItem();
+            warehouse.addItemAtDelivery(delivery, delivered);
 
             taskManager.markTaskCompleted(taskId);
             robot.setCurrentTaskId(-1);
@@ -364,7 +380,7 @@ T Simulation::getInput(const std::string& prompt, T min, T max) {
     }
 }
 
-void Simulation::sendToCharge(Robot& r) {
+bool Simulation::sendToCharge(Robot& r) {
     Position rPosition = r.getPosition();
     Position chargePoint{};
     std::vector<Position> path;
@@ -398,7 +414,7 @@ void Simulation::sendToCharge(Robot& r) {
     }
     if (!freeSpot) {
         std::cout <<"No available charging stations at the moment" << std::endl;
-        return;
+        return false;
     }
 
     std::cout<<"Sending Robot to " << warehouse.listChargingPoints[index].ID << " charger..." << std::endl;
@@ -406,6 +422,8 @@ void Simulation::sendToCharge(Robot& r) {
     warehouse.listChargingPoints[index].free = false;
 
     r.setRoute(path);
+
+    return true;
 }
 
 void Simulation::continueTask(Robot &r) {
@@ -491,41 +509,72 @@ void Simulation::showTaskStatus()
 
 void Simulation::createTask()
 {
-    int itemId = getInput<int>("Enter Item ID: ", 1, 1000000);
+    bool done = false;
 
-    int pickupX = getInput<int>(
-        "Pickup row: ", 0, config.length - 1);
+    warehouse.displayPickupLocations();
+    warehouse.displayDeliveryLocations();
 
-    int pickupY = getInput<int>(
-        "Pickup column: ", 0, config.width - 1);
+    int pickupCount = static_cast<int>(warehouse.listPickupPoints.size());
+    int deliveryCount = static_cast<int>(warehouse.listDeliveryPoints.size());
 
-    int deliveryX = getInput<int>(
-        "Delivery row: ", 0, config.length - 1);
-
-    int deliveryY = getInput<int>(
-        "Delivery column: ", 0, config.width - 1);
-
-    Position pickup(pickupX, pickupY);
-    Position delivery(deliveryX, deliveryY);
-
-    if (warehouse.getCell(pickupX, pickupY) == '#' ||
-        warehouse.getCell(deliveryX, deliveryY) == '#')
-    {
-        std::cout << "Location cannot be a wall.\n";
+    if (pickupCount == 0 || deliveryCount == 0) {
+        std::cout << "Need at least one pickup and one delivery point.\n";
         return;
     }
 
-    if (!taskManager.isPickupAvailable(pickup))
-    {
-        std::cout << "Pickup location is already in use.\n";
+    int PUid = getInput<int>("Enter Pick Up Point ID (0 to cancel): ", 0, pickupCount);
+    if (PUid == 0) return;
+
+    int DPid = getInput<int>("Enter Delivery Point ID: ", 1, deliveryCount);
+
+
+    while (!done) {
+        if (!taskManager.isPickupAvailable(warehouse.listPickupPoints[PUid-1].positionPU))
+        {
+            std::cout << "Pickup location is already in use.\n";
+            PUid = getInput<int>("Enter Pick Up Point ID (0 to cancel): ", 0, pickupCount);
+            if (PUid == 0) return;
+        }
+        else {
+            done = true;
+        }
+    }
+
+    //Items come from the file, so the chosen pickup point must already have them
+    const std::vector<std::shared_ptr<Item>>& items = warehouse.listPickupPoints[PUid-1].items;
+
+    if (items.empty()) {
+        std::cout << "No items at this pickup point.\n";
         return;
     }
 
-    taskManager.createTask(itemId, pickup, delivery);
+    std::cout << "Items at pickup point " << PUid << ":\n";
+    for (const auto& item : items) {
+        std::cout << "  Item ID " << item->getId() << "\n";
+    }
+
+    //Keep asking until the item ID is one that is actually at this pickup point
+    int itemID{};
+    bool found = false;
+    while (!found) {
+        itemID = getInput<int>("Enter Item ID (0 to cancel): ");
+        if (itemID == 0) return;
+
+        for (const auto& item : items) {
+            if (item->getId() == itemID) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            std::cout << "Item " << itemID << " is not at this pickup point.\n";
+        }
+    }
+
+    taskManager.createTask(itemID, warehouse.listPickupPoints[PUid-1].positionPU, warehouse.listDeliveryPoints[DPid-1].positionD);
 
     std::cout << "Task created successfully!\n";
 }
-
 void Simulation::assignTask()
 {
     int taskId = getInput<int>("Enter Task ID: ");

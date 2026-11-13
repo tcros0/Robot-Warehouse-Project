@@ -26,7 +26,7 @@ private:
     std::vector<Robot> robots;
 
     int currentTime{};
-    void sendToCharge(Robot& r);
+    bool sendToCharge(Robot& r);
     void continueTask(Robot& r);
 
     void ShowPath();
