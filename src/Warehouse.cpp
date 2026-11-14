@@ -48,13 +48,7 @@ void Warehouse::createMap() {
         warehouseMap[x][y] = 'C';
     }
 
-    //Draws Robot Position
-    for (int i = 0; i<robots.getRobots().size(); i++) {
-        int x = robots.getRobots()[i].getPosition().getXPosition();
-        int y = robots.getRobots()[i].getPosition().getYPosition();
-
-        warehouseMap[x][y] = 'R';
-    }
+    
 
     std::cout << "Warehouse created" << std::endl;
 }
