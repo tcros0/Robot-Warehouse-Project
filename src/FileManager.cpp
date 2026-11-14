@@ -1,5 +1,3 @@
-// Updated by farrokh880 11/01/2026
-
 #include "../include/FileManager.h"
 #include <fstream>
 #include <sstream>

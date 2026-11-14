@@ -1,5 +1,6 @@
 #include "Warehouse.h"
 #include<iostream>
+#include "RobotManager.h"
 
 Warehouse::Warehouse() {}
 Warehouse::Warehouse(int length, int width) {
@@ -21,6 +22,7 @@ bool Warehouse::isInBounds(int x, int y) const {
 void Warehouse::createMap() {
 
     warehouseMap.assign(length, std::vector<char>(width, '.'));
+    RobotManager robots;
 
     //Draws the Pickup Point
     for (int i = 0; i<listPickupPoints.size(); i++) {
@@ -44,6 +46,14 @@ void Warehouse::createMap() {
         int y = listChargingPoints[i].positionC.getYPosition();
 
         warehouseMap[x][y] = 'C';
+    }
+
+    //Draws Robot Position
+    for (int i = 0; i<robots.getRobots().size(); i++) {
+        int x = robots.getRobots()[i].getPosition().getXPosition();
+        int y = robots.getRobots()[i].getPosition().getYPosition();
+
+        warehouseMap[x][y] = 'R';
     }
 
     std::cout << "Warehouse created" << std::endl;
