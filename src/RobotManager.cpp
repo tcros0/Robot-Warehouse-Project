@@ -10,6 +10,11 @@ void RobotManager::addRobot(const Robot& robot) {
     robots_.push_back(robot);
 }
 
+void RobotManager::addRobot(int ID, Position position, int width, int height, int battery) {
+    //Build the robot directly inside the vector (no extra copy)
+    robots_.emplace_back(ID, position, width, height, battery);
+}
+
 void RobotManager::updateAll() {
     for (auto& robot : robots_) {
         if (robot.getBatteryLevel() <= 0) continue;  // dead robots stay put
