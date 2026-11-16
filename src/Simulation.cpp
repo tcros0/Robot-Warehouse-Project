@@ -19,7 +19,7 @@ Simulation::Simulation(const SimulationConfig& config) {
 
 void Simulation::buildFromConfig() {
     warehouse = Warehouse();
-    robots.clear();
+    robotManager.clear();
     currentTime = 0;
 
     //Creates x by y map size
@@ -63,7 +63,7 @@ void Simulation::buildFromConfig() {
     for (const auto& rc : config.robots) {
         if (warehouse.isInBounds(rc.position.getXPosition(), rc.position.getYPosition())&&(warehouse.getCell(rc.position.getXPosition(), rc.position.getYPosition()) != '#')) {
 
-          robots.emplace_back(rc.ID, rc.position,
+          robotManager.addRobot(rc.ID, rc.position,
                     config.width, config.length, rc.battery); 
         }
         else {
@@ -169,48 +169,62 @@ void Simulation::run() {
         "\n6.Edit Warehouse"
         "\n7.Reset Warehouse"
         "\n8.Advance time"
-        "\n9.Exit"
+        "\n9.Assign Task"
         "\n10.Display Path"
-        "\n11.Assign Task" << std::endl;
+        "\n11.Exit" << std::endl;
 
         option = getInput<int> ("Enter Option: ", 1, 11);
 
 
         switch(option){
             case 1:
-                warehouse.display();
+                warehouse.display(robotManager);
                 break;
             case 2:
+                std::cout<<std::endl << "======================"<<std::endl;
                 inspectRobot();
+                std::cout<<std::endl << "======================"<<std::endl;
                 break;
             case 3:
+                std::cout<<std::endl << "======================"<<std::endl;
                 createTask();
+                std::cout<<std::endl << "======================"<<std::endl;
                 break;
             case 4:
+                std::cout<<std::endl << "======================"<<std::endl;
                 showTaskStatus();
+                std::cout<<std::endl << "======================"<<std::endl;
                 break;
            case 5:
+                std::cout<<std::endl << "======================"<<std::endl;
                 createWarehouseLayout();
+                std::cout<<std::endl << "======================"<<std::endl;
                 break;
             case 6:
+                std::cout<<std::endl << "======================"<<std::endl;
                 editWarehouse();
+                std::cout<<std::endl << "======================"<<std::endl;
                 break;     
             case 7:
+                std::cout<<std::endl << "======================"<<std::endl;
                 buildFromConfig();
                 std::cout<<"Warehouse was reset to initial settings" << std::endl;
+                std::cout<<std::endl << "======================"<<std::endl;
                 break;
             case 8:
                 advanceTime();
                 break;
             case 9:
-                done = true;
+                std::cout<<std::endl << "======================"<<std::endl;
+                assignTask();
+                std::cout<<std::endl << "======================"<<std::endl;
                 break;
             case 10:
                 ShowPath();
                 break;
             case 11:
-                assignTask();
-                break; 
+                done = true;
+                break;
         }
     }
 
@@ -220,6 +234,7 @@ void Simulation::run() {
 
 void Simulation::advanceTime()
 {
+    std::vector<Robot>& robots = robotManager.getRobots();
     currentTime++;
 
     std::cout << "\nTime: " << currentTime << std::endl;
@@ -230,43 +245,63 @@ void Simulation::advanceTime()
         return a.getId() < b.getId();
     });
 
-for (Robot& robot : robots)
+    for (Robot& robot : robots)
     {
-    
-if (robot.getStatus() == "Broken" ||
-    robot.getBatteryLevel() == 0)
-{
-    int taskId = robot.getCurrentTaskId();
 
-    if (taskId != -1)
-    {
-        Task* task = taskManager.getTask(taskId);
+        Position here = robot.getPosition();
 
-      
-if (task != nullptr &&
-    task->getStatus() == "Assigned")
-{
-    // Return the item to its original pickup location
-    if (robot.isCarryingItem())
-    {
-        std::shared_ptr<Item> item = robot.dropOffItem();
+        // A robot that ran out of battery while standing on a charger can still charge
+        bool onCharger = false;
+        for (const auto& station : warehouse.listChargingPoints)
+        {
+            if (station.positionC.getXPosition() == here.getXPosition() &&
+                station.positionC.getYPosition() == here.getYPosition())
+            {
+                onCharger = true;
+                break;
+            }
+        }
 
-        warehouse.addItemAtPickup(
-            task->getPickupLocation(), item);
+        if (robot.getBatteryLevel() == 0 && onCharger)
+        {
+            robot.setStatus("To Charge");   // the charging block below takes over
+        }
 
-        std::cout << "Item returned to pickup location.\n";
-    }
+        if ((robot.getStatus() == "Broken" ||
+            robot.getBatteryLevel() == 0) &&
+            robot.getStatus() != "To Charge")
+        {
+            int taskId = robot.getCurrentTaskId();
 
-    // Make the task available again
-    task->resetAssignment();
-}
-  
+            if (taskId != -1)
+            {
+                Task* task = taskManager.getTask(taskId);
 
-        robot.setCurrentTaskId(-1);
-    }
 
-    continue;
-}    
+                if (task != nullptr &&
+                    task->getStatus() == "Assigned")
+                {
+                    // Return the item to its original pickup location
+                    if (robot.isCarryingItem())
+                    {
+                        std::shared_ptr<Item> item = robot.dropOffItem();
+
+                        warehouse.addItemAtPickup(
+                            task->getPickupLocation(), item);
+
+                        std::cout << "Item returned to pickup location.\n";
+                    }
+
+                    // Make the task available again
+                    task->resetAssignment();
+                }
+
+
+                robot.setCurrentTaskId(-1);
+            }
+
+            continue;
+        }
 
 
         // Send robot to charge when battery is low
@@ -282,14 +317,14 @@ if (task != nullptr &&
             }
         }
 
-        // Move robot along its route
+        // Move robot along its route, or wait one turn if the next cell is taken
         bool canMove = true;
 
         if (!robot.route.empty())
         {
             Position next = robot.route.front();
 
-            // Check whether the next cell is occupied
+            // Check whether another robot is standing on the next cell
             for (const Robot& other : robots)
             {
                 if (other.getId() == robot.getId())
@@ -305,31 +340,11 @@ if (task != nullptr &&
                 }
             }
 
-            // Find an alternative path if blocked
             if (!canMove)
             {
-                Position goal = robot.route.back();
-
-                std::vector<Position> alternativePath =
-                    pathfinding.findPathAvoidingRobots(
-                        warehouse,
-                        robot.getPosition(),
-                        goal,
-                        robots);
-
-                if (!alternativePath.empty())
-                {
-                    robot.setRoute(alternativePath);
-                    canMove = true;
-
-                    std::cout << "Robot " << robot.getId()
-                              << " found an alternative path.\n";
-                }
-                else
-                {
-                    std::cout << "Robot " << robot.getId()
-                              << " waiting: path blocked.\n";
-                }
+                // Waiting = not moving this turn; the route stays the same, so it tries again next turn
+                std::cout << "Robot " << robot.getId()
+                          << " waiting: next cell is taken.\n";
             }
         }
 
@@ -551,6 +566,8 @@ Simulation::~Simulation(){}
  // Display all robots
 void Simulation::inspectRobot()
 {
+    std::vector<Robot>& robots = robotManager.getRobots();
+
     if (robots.empty())
     {
         std::cout << "No robots available.\n";
@@ -562,13 +579,14 @@ void Simulation::inspectRobot()
         Position pos = robot.getPosition();
 
         std::cout << "\nRobot ID: " << robot.getId()
-                  << "\nPosition: (" << pos.getXPosition()
+                  << "\n  Position: (" << pos.getXPosition()
                   << ", " << pos.getYPosition() << ")"
-                  << "\nBattery: " << robot.getBatteryLevel() << "%"
-                  << "\nStatus: " << robot.getStatus()
-                  << "\nCurrent Task: " << robot.getCurrentTaskId()
+                  << "\n  Battery: " << robot.getBatteryLevel() << "%"
+                  << "\n  Status: " << robot.getStatus()
+                  << "\n  Current Task: " << robot.getCurrentTaskId()
                   << "\n";
     }
+    std::cout<<std::endl;
 }
 
 void Simulation::showTaskStatus()
@@ -587,13 +605,13 @@ void Simulation::showTaskStatus()
         Position delivery = task.getDeliveryLocation();
 
         std::cout << "\nTask ID: " << task.getTaskId()
-                  << "\nItem ID: " << task.getItemId()
-                  << "\nPickup: (" << pickup.getXPosition()
+                  << "\n  Item ID: " << task.getItemId()
+                  << "\n  Pickup: (" << pickup.getXPosition()
                   << ", " << pickup.getYPosition() << ")"
-                  << "\nDelivery: (" << delivery.getXPosition()
+                  << "\n  Delivery: (" << delivery.getXPosition()
                   << ", " << delivery.getYPosition() << ")"
-                  << "\nStatus: " << task.getStatus()
-                  << "\nAssigned Robot: " << task.getAssignedRobotId()
+                  << "\n  Status: " << task.getStatus()
+                  << "\n  Assigned Robot: " << task.getAssignedRobotId()
                   << "\n";
     }
 }
@@ -613,11 +631,11 @@ void Simulation::createTask()
         return;
     }
 
-    int PUid = getInput<int>("Enter Pick Up Point ID (0 to cancel): ", 0, pickupCount);
+    int PUid = getInput<int>("Enter Pick Up Point ID: ", 0, pickupCount);
     if (PUid == 0) return;
 
-    int DPid = getInput<int>("Enter Delivery Point ID: ", 1, deliveryCount);
-
+    int DPid = getInput<int>("Enter Delivery Point ID: ", 0, deliveryCount);
+    if (DPid == 0) return;
 
     while (!done) {
         if (!taskManager.isPickupAvailable(warehouse.listPickupPoints[PUid-1].positionPU))
@@ -669,7 +687,17 @@ void Simulation::createTask()
 
 void Simulation::assignTask()
 {
+    std::vector<Robot>& robots = robotManager.getRobots();
+
+    showTaskStatus();
+    std::cout<<std::endl;
+
     int taskId = getInput<int>("Enter Task ID: ");
+
+    std::cout<<std::endl << "======================";
+
+    inspectRobot();
+
     int robotId = getInput<int>("Enter Robot ID: ");
 
     for (Robot& robot : robots)
@@ -694,6 +722,8 @@ void Simulation::assignTask()
 
 void Simulation::createWarehouseLayout()
 {
+    std::vector<Robot>& robots = robotManager.getRobots();
+
     int rows = getInput<int>("Enter number of rows: ", 1, 100);
     int cols = getInput<int>("Enter number of columns: ", 1, 100);
 
@@ -720,11 +750,13 @@ void Simulation::createWarehouseLayout()
     // config is NOT changed, so Reset still restores the original layout from the file
 
     std::cout << "New warehouse layout created!\n";
-    warehouse.display();
+    warehouse.display(robotManager);
 }
 
 void Simulation::editWarehouse()
 {
+    std::vector<Robot>& robots = robotManager.getRobots();
+
     int choice;
 
     do {
@@ -813,7 +845,7 @@ void Simulation::editWarehouse()
             }
         }
 
-        warehouse.display();
+        warehouse.display(robotManager);
 
     } while (choice != 6);
 }

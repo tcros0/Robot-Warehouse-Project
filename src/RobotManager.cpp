@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 
+RobotManager::RobotManager() {};
 
 void RobotManager::addRobot(const Robot& robot) {
     if (findById(robot.getId()) != nullptr) {
@@ -34,6 +35,10 @@ const Robot* RobotManager::findById(int id) const {
     return nullptr;
 }
 
+void RobotManager::clear() {
+    robots_.clear();
+}
 
-const std::vector<Robot>& RobotManager::getRobots() const { return robots_; }
+
+std::vector<Robot>& RobotManager::getRobots() { return robots_; }
 size_t RobotManager::robotCount() const { return robots_.size(); }

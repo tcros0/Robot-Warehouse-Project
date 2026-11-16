@@ -1,6 +1,7 @@
 #include "Warehouse.h"
 #include<iostream>
 #include "RobotManager.h"
+#include "iomanip"
 
 Warehouse::Warehouse() {}
 Warehouse::Warehouse(int length, int width) {
@@ -22,7 +23,6 @@ bool Warehouse::isInBounds(int x, int y) const {
 void Warehouse::createMap() {
 
     warehouseMap.assign(length, std::vector<char>(width, '.'));
-    RobotManager robots;
 
     //Draws the Pickup Point
     for (int i = 0; i<listPickupPoints.size(); i++) {
@@ -170,25 +170,28 @@ bool Warehouse::addListDeliveryItems(int ID, std::shared_ptr<Item> item) {
 void Warehouse::displayPickupLocations() const{
     std::cout<<"Pickup Locations: " << std::endl;
     for (int i = 0; i<listPickupPoints.size(); i++) {
-        std::cout<<"Pickup point ID: " << listPickupPoints[i].ID << std::endl;
-        std::cout<< "x: " << listPickupPoints[i].positionPU.getXPosition() << " y: " <<listPickupPoints[i].positionPU.getYPosition() << std::endl;;
+        std::cout<<"   Pickup point ID: " << listPickupPoints[i].ID << std::endl;
+        std::cout<< std::setw(10) <<"x: " << listPickupPoints[i].positionPU.getXPosition() << " y: " <<listPickupPoints[i].positionPU.getYPosition() << std::endl;;
     }
+    std::cout<<std::endl;
 }
 
 void Warehouse::displayDeliveryLocations() const{
     std::cout<<"Delivery Locations: " << std::endl;
     for (int i = 0; i<listDeliveryPoints.size(); i++) {
-        std::cout<<"Delivery point ID: " << listDeliveryPoints[i].ID << std::endl;
-        std::cout<<"x: " << listDeliveryPoints[i].positionD.getXPosition() << " y: " << listDeliveryPoints[i].positionD.getYPosition() << std::endl;
+        std::cout<<"   Delivery point ID: " << listDeliveryPoints[i].ID << std::endl;
+        std::cout<< std::setw(10)<<"x: " << listDeliveryPoints[i].positionD.getXPosition() << " y: " << listDeliveryPoints[i].positionD.getYPosition() << std::endl;
     }
+    std::cout<<std::endl;
 }
 
 void Warehouse::displayChargingLocation() const{
     std::cout<<"Charging Locations: " << std::endl;
     for (int i = 0; i<listChargingPoints.size(); i++) {
-        std::cout<<"Charging point ID: " << listChargingPoints[i].ID << std::endl;
-        std::cout<<"x: " << listChargingPoints[i].positionC.getXPosition() << " y: " << listChargingPoints[i].positionC.getYPosition() << std::endl;
+        std::cout<<"   Charging point ID: " << listChargingPoints[i].ID << std::endl;
+        std::cout<< std::setw(10)<<"x: " << listChargingPoints[i].positionC.getXPosition() << " y: " << listChargingPoints[i].positionC.getYPosition() << std::endl;
     }
+    std::cout<<std::endl;
 }
 
 Position Warehouse::getPickupLocation(int ID) const {
@@ -266,14 +269,32 @@ char Warehouse::getCell(int x, int y) const {
     return warehouseMap[x][y];
 }
 
-void Warehouse::display() const {
+void Warehouse::display(RobotManager& robotManager) const {
     std::cout<<"Warehouse Map" << std::endl;
+
+
     for (int i = 0; i<warehouseMap.size(); i++) {
         for (int o = 0; o<warehouseMap[i].size(); o++) {
-            std::cout << warehouseMap[i][o];
+            bool robotHere = false;
+
+            for (int k =0;k<robotManager.getRobots().size(); k++){
+                if (robotManager.getRobots()[k].getPosition().getXPosition() == i &&robotManager.getRobots()[k].getPosition().getYPosition() == o) {
+                    robotHere = true;
+                    break;
+                }
+        }
+            if (robotHere) {
+                std::cout << "R";
+            }
+            else {
+                std::cout << warehouseMap[i][o];
+            }
+
         }
         std::cout<<std::endl;
     }
+
+
 }
 
 //Adds an item to the pickup point at this position
