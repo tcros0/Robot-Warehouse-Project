@@ -14,6 +14,11 @@ private:
 public:
     PathFinding();
     std::vector<Position> findPath(const Warehouse& warehouse, const Position& start, const Position& goal) const;
+    std::vector<Position> findPathAvoidingRobots(
+    const Warehouse& warehouse,
+    const Position& start,
+    const Position& goal,
+    const std::vector<Robot>& robots) const;
     bool isWalkable(const Warehouse& warehouse, const Position& position) const;
     bool freeSpace(RobotManager robots, Position position);
     ~PathFinding();
