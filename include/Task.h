@@ -45,6 +45,8 @@ public:
     // Assign a robot to the task
     void assignRobot(int robotId);
 };
+    // Remove the assigned robot
+    void resetAssignment();
 
 
 #endif //TASK_H
