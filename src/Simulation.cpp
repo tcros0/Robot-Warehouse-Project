@@ -242,11 +242,25 @@ if (robot.getStatus() == "Broken" ||
     {
         Task* task = taskManager.getTask(taskId);
 
-        if (task != nullptr &&
-            task->getStatus() == "Assigned")
-        {
-            task->resetAssignment();
-        }
+      
+if (task != nullptr &&
+    task->getStatus() == "Assigned")
+{
+    // Return the item to its original pickup location
+    if (robot.isCarryingItem())
+    {
+        std::shared_ptr<Item> item = robot.dropOffItem();
+
+        warehouse.addItemAtPickup(
+            task->getPickupLocation(), item);
+
+        std::cout << "Item returned to pickup location.\n";
+    }
+
+    // Make the task available again
+    task->resetAssignment();
+}
+  
 
         robot.setCurrentTaskId(-1);
     }
