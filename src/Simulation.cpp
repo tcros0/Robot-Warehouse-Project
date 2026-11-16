@@ -254,36 +254,62 @@ for (Robot& robot : robots)
         }
 
         // Move robot along its route
-// Check for collisions before moving
-bool canMove = true;
+        bool canMove = true;
 
-if (!robot.route.empty())
-{
-    Position next = robot.route.front();
-
-    for (const Robot& other : robots)
-    {
-        if (other.getId() == robot.getId())
-            continue;
-
-        Position otherPos = other.getPosition();
-
-        if (next.getXPosition() == otherPos.getXPosition() &&
-            next.getYPosition() == otherPos.getYPosition())
+        if (!robot.route.empty())
         {
-            canMove = false;
-            break;
+            Position next = robot.route.front();
+
+            // Check whether the next cell is occupied
+            for (const Robot& other : robots)
+            {
+                if (other.getId() == robot.getId())
+                    continue;
+
+                Position otherPos = other.getPosition();
+
+                if (next.getXPosition() == otherPos.getXPosition() &&
+                    next.getYPosition() == otherPos.getYPosition())
+                {
+                    canMove = false;
+                    break;
+                }
+            }
+
+            // Find an alternative path if blocked
+            if (!canMove)
+            {
+                Position goal = robot.route.back();
+
+                std::vector<Position> alternativePath =
+                    pathfinding.findPathAvoidingRobots(
+                        warehouse,
+                        robot.getPosition(),
+                        goal,
+                        robots);
+
+                if (!alternativePath.empty())
+                {
+                    robot.setRoute(alternativePath);
+                    canMove = true;
+
+                    std::cout << "Robot " << robot.getId()
+                              << " found an alternative path.\n";
+                }
+                else
+                {
+                    std::cout << "Robot " << robot.getId()
+                              << " waiting: path blocked.\n";
+                }
+            }
         }
-    }
-}
 
-// Move only if the next position is free
-if (canMove && robot.moveAlongRoute())
-{
-    std::cout << "Robot " << robot.getId()
-              << " moved.\n";
-}
-
+        // Move only if the next position is free
+        if (canMove && robot.moveAlongRoute())
+        {
+            std::cout << "Robot " << robot.getId()
+                      << " moved.\n";
+        }
         Position pos = robot.getPosition();
 
         // Charge robot at charging station
