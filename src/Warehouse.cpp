@@ -48,7 +48,7 @@ void Warehouse::createMap() {
         warehouseMap[x][y] = 'C';
     }
 
-    
+
 
     std::cout << "Warehouse created" << std::endl;
 }
