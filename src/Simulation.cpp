@@ -232,13 +232,28 @@ void Simulation::advanceTime()
 
 for (Robot& robot : robots)
     {
-        
-      if (robot.getStatus() == "Broken" ||
-      robot.getBatteryLevel() == 0)
+    
+if (robot.getStatus() == "Broken" ||
+    robot.getBatteryLevel() == 0)
 {
-      robot.setCurrentTaskId(-1);
-      continue;
-}
+    int taskId = robot.getCurrentTaskId();
+
+    if (taskId != -1)
+    {
+        Task* task = taskManager.getTask(taskId);
+
+        if (task != nullptr &&
+            task->getStatus() == "Assigned")
+        {
+            task->resetAssignment();
+        }
+
+        robot.setCurrentTaskId(-1);
+    }
+
+    continue;
+}    
+
 
         // Send robot to charge when battery is low
         if (robot.isLowBattery() &&
