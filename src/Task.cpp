@@ -55,9 +55,16 @@ void Task::setStatus(const std::string& newStatus)
     status = newStatus;
 }
 
+
 // Assign a robot to the task
 void Task::assignRobot(int robotId)
 {
     assignedRobotId = robotId;
     status = "Assigned";
+}
+// Return task to pending when a robot breaks down
+void Task::resetAssignment()
+{
+    assignedRobotId = -1;
+    status = "Pending";
 }
