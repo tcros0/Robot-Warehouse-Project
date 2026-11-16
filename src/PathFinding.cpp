@@ -101,6 +101,18 @@ std::vector<Position> PathFinding::findPath(const Warehouse& warehouse, const Po
     return path;
 }
 
-bool PathFinding::freeSpace(RobotManager robots, Position position) {
-    
+bool PathFinding::freeSpace(RobotManager robots, Position position)
+{
+    for (const Robot& robot : robots.getRobots())
+    {
+        Position robotPos = robot.getPosition();
+
+        if (robotPos.getXPosition() == position.getXPosition() &&
+            robotPos.getYPosition() == position.getYPosition())
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
