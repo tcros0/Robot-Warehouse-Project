@@ -100,13 +100,13 @@ bool TaskManager::markTaskCompleted(int taskId)
     return true;
 }
 
-// Reassign a task to another robot
+// Reassign a pending task to another robot
 bool TaskManager::reassignTask(int taskId, Robot& robot)
 {
     Task* task = getTask(taskId);
 
     if (task == nullptr ||
-        task->getStatus() == "Completed" ||
+        task->getStatus() != "Pending" ||
         !isRobotAvailable(robot))
     {
         return false;
@@ -118,9 +118,9 @@ bool TaskManager::reassignTask(int taskId, Robot& robot)
     return true;
 }
 
-
-// Empties list
-void TaskManager::resetList() {
+// Clear all tasks
+void TaskManager::resetList()
+{
     tasks.clear();
     nextTaskId = 1;
 }
