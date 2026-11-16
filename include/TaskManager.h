@@ -50,5 +50,8 @@ public:
 
     // Deletes all tasks in list
     void resetList();
+
+    //returns task list
+    std::vector<Task> getTaskList();
 };
 

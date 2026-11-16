@@ -3,6 +3,7 @@
 #include "Item.h"
 #include "Position.h"
 #include <memory>
+#include "RobotManager.h"
 
 
 struct pickupPoint {
@@ -70,7 +71,7 @@ public:
     bool setCell(int row, int col, char symbol);
     bool removeWall(int row, int col);
     char getCell(int row, int col) const;
-    void display() const;
+    void display(RobotManager& robotManager) const;
 
     //Item handling by position (tasks store positions, not point IDs)
     bool addItemAtPickup(const Position& pos, std::shared_ptr<Item> item);

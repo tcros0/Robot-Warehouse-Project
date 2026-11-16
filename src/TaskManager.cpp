@@ -124,3 +124,7 @@ void TaskManager::resetList()
     tasks.clear();
     nextTaskId = 1;
 }
+
+std::vector<Task> TaskManager::getTaskList() {
+    return tasks;
+}

@@ -23,7 +23,7 @@ private:
     RobotManager robotManager;
 
 
-    std::vector<Robot> robots;
+    //std::vector<Robot> robots;
 
     int currentTime{};
     bool sendToCharge(Robot& r);
