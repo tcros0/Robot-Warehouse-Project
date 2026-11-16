@@ -6,6 +6,7 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <algorithm>
 
 Simulation::Simulation(const SimulationConfig& config) {
 
@@ -223,7 +224,13 @@ void Simulation::advanceTime()
 
     std::cout << "\nTime: " << currentTime << std::endl;
 
-    for (Robot& robot : robots)
+    // Process robots in ID order
+    std::sort(robots.begin(), robots.end(),
+    [](const Robot& a, const Robot& b) {
+        return a.getId() < b.getId();
+    });
+
+for (Robot& robot : robots)
     {
         
       if (robot.getStatus() == "Broken" ||
@@ -247,11 +254,35 @@ void Simulation::advanceTime()
         }
 
         // Move robot along its route
-        if (robot.moveAlongRoute())
+// Check for collisions before moving
+bool canMove = true;
+
+if (!robot.route.empty())
+{
+    Position next = robot.route.front();
+
+    for (const Robot& other : robots)
+    {
+        if (other.getId() == robot.getId())
+            continue;
+
+        Position otherPos = other.getPosition();
+
+        if (next.getXPosition() == otherPos.getXPosition() &&
+            next.getYPosition() == otherPos.getYPosition())
         {
-            std::cout << "Robot " << robot.getId()
-                      << " moved.\n";
+            canMove = false;
+            break;
         }
+    }
+}
+
+// Move only if the next position is free
+if (canMove && robot.moveAlongRoute())
+{
+    std::cout << "Robot " << robot.getId()
+              << " moved.\n";
+}
 
         Position pos = robot.getPosition();
 
