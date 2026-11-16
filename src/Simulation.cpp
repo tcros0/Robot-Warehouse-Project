@@ -17,7 +17,6 @@ Simulation::Simulation(const SimulationConfig& config) {
 
 
 void Simulation::buildFromConfig() {
-    RobotManager robotManager;
     warehouse = Warehouse();
     robots.clear();
     currentTime = 0;
@@ -63,8 +62,8 @@ void Simulation::buildFromConfig() {
     for (const auto& rc : config.robots) {
         if (warehouse.isInBounds(rc.position.getXPosition(), rc.position.getYPosition())&&(warehouse.getCell(rc.position.getXPosition(), rc.position.getYPosition()) != '#')) {
 
-            robotManager.addRobot(rc.ID, rc.position,
-            config.width, config.length, rc.battery);
+          robots.emplace_back(rc.ID, rc.position,
+                    config.width, config.length, rc.battery); 
         }
         else {
             std::cout << "Robot " << rc.ID << " skipped: start position (" << rc.position.getXPosition()  << ", " << rc.position.getYPosition() << ") is out of bounds or a wall.\n";
@@ -226,11 +225,13 @@ void Simulation::advanceTime()
 
     for (Robot& robot : robots)
     {
-        if (robot.getStatus() == "Broken" ||
-            robot.getBatteryLevel() == 0)
-            robot.setCurrentTaskId(-1);
-            
-            continue;
+        
+      if (robot.getStatus() == "Broken" ||
+      robot.getBatteryLevel() == 0)
+{
+      robot.setCurrentTaskId(-1);
+      continue;
+}
 
         // Send robot to charge when battery is low
         if (robot.isLowBattery() &&
