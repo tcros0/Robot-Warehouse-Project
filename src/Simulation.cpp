@@ -602,7 +602,7 @@ Simulation::~Simulation()
 
         // Save layout to file
         FileManager fileManager;
-        fileManager.saveConfig(savedConfig, "warehouse.txt");
+        fileManager.saveConfig(savedConfig, "data/Warehouse.txt");
 
         std::cout << "Warehouse saved successfully!\n";
     }
