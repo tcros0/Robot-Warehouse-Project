@@ -561,7 +561,58 @@ void Simulation::continueTask(Robot &r) {
 
 }
 
-Simulation::~Simulation(){}
+
+Simulation::~Simulation()
+{
+    try
+    {
+        SimulationConfig savedConfig;
+
+        // Save warehouse size
+        savedConfig.length = warehouse.getLength();
+        savedConfig.width = warehouse.getWidth();
+
+        // Save pickup, delivery, and charging points
+        savedConfig.pickupPoints = warehouse.listPickupPoints;
+        savedConfig.deliveryPoints = warehouse.listDeliveryPoints;
+        savedConfig.chargingPoints = warehouse.listChargingPoints;
+
+        // Save walls
+        for (int row = 0; row < warehouse.getLength(); row++)
+        {
+            for (int col = 0; col < warehouse.getWidth(); col++)
+            {
+                if (warehouse.getCell(row, col) == '#')
+                {
+                    savedConfig.obstacles.push_back(Position(row, col));
+                }
+            }
+        }
+
+        // Save robots
+        for (const Robot& robot : robotManager.getRobots())
+        {
+            RobotConfig rc;
+            rc.ID = robot.getId();
+            rc.position = robot.getPosition();
+            rc.battery = robot.getBatteryLevel();
+
+            savedConfig.robots.push_back(rc);
+        }
+
+        // Save layout to file
+        FileManager fileManager;
+        fileManager.saveConfig(savedConfig, "warehouse.txt");
+
+        std::cout << "Warehouse saved successfully!\n";
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error saving warehouse: "
+                  << e.what() << std::endl;
+    }
+}
+
 
  // Display all robots
 void Simulation::inspectRobot()
